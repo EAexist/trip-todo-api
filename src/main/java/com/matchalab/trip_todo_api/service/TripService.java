@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.matchalab.trip_todo_api.exception.TripNotFoundException;
 import com.matchalab.trip_todo_api.model.Accomodation;
+import com.matchalab.trip_todo_api.model.CustomTodoContent;
 import com.matchalab.trip_todo_api.model.Todo;
 import com.matchalab.trip_todo_api.model.Trip;
 import com.matchalab.trip_todo_api.model.DTO.TodoDTO;
@@ -42,9 +43,10 @@ public class TripService {
     /**
      * Update the content of a Trip.
      */
-    public TripDTO putTrip(Trip newTrip) {
-        Trip trip = tripRepository.save(newTrip);
-        return tripMapper.mapToTripDTO(trip);
+    public TripDTO putTrip(Long tripId, TripDTO newTripDTO) {
+        Trip trip = tripMapper.mapToTrip(newTripDTO);
+        trip.setId(tripId);
+        return tripMapper.mapToTripDTO(tripRepository.save(trip));
     }
 
     /**
@@ -58,11 +60,12 @@ public class TripService {
     /**
      * Create new empty todo.
      */
-    public TodoDTO createTodo(Long tripId) {
+    public TodoDTO createTodo(Long tripId, String category) {
         Todo newTodo = new Todo();
         Trip trip = tripRepository.findById(tripId).orElseThrow(() -> new TripNotFoundException(tripId));
         newTodo.setOrder_key(0);
         newTodo.setTrip(trip);
+        newTodo.setCustomTodoContent(new CustomTodoContent(newTodo, category));
         return tripMapper.mapToTodoDTO(todoRepository.save(newTodo));
         // return tripRepository.findById(tripId).orElseThrow(() -> new
         // TripNotFoundException(tripId));
