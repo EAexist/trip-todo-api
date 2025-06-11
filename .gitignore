@@ -20,7 +20,7 @@ bin/
 .vscode/
 
 # Docker
-pgdata/*
+pgdata/
 
 # Sensitive information
 application-prod.yml
