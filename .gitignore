@@ -1,0 +1,27 @@
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
+
+# Gradle
+.gradle/
+gradle/
+build/
+bin/
+
+# IDE specific files
+*.iml
+*.ipr
+*.iws
+*.project
+*.classpath
+*.prefs
+.vscode/
+
+# Docker
+pgdata/*
+
+# Sensitive information
+application-prod.yml
+application.yml
