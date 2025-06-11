@@ -1,8 +1,11 @@
-  postgres:
-    image: postgres:11.5
+services:
+  database:
+    image: postgres
     ports:
-      - 5432:5432
+    - '5432:5432'
     environment:
-      - POSTGRES_USER=stratospheric
-      - POSTGRES_PASSWORD=stratospheric
-      - POSTGRES_DB=stratospheric
+    - 'POSTGRES_USER=matchalab_admin_test'
+    - 'POSTGRES_DB=trip_todo'
+    - 'POSTGRES_PASSWORD=hello_test'
+    volumes:
+      - "./pgdata:/var/lib/postgresql/data"
