@@ -1,5 +1,7 @@
 package com.matchalab.trip_todo_api.model;
 
+import java.util.Locale.Category;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -30,6 +32,10 @@ public class CustomTodoContent extends TodoContent {
             String iconId) {
         super(category, type, title, iconId);
         this.todo = todo;
+    }
 
+    public CustomTodoContent(Todo todo, String category) {
+        super(category);
+        this.todo = todo;
     }
 }

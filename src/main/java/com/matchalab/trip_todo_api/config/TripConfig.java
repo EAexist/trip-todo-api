@@ -12,7 +12,7 @@ import com.matchalab.trip_todo_api.repository.TripRepository;
 import com.matchalab.trip_todo_api.service.TripService;
 
 @Configuration
-@EnableJpaRepositories
+@EnableJpaRepositories(basePackages = "com.matchalab.trip_todo_api")
 // @ComponentScan(basePackageClasses = TripMapper.class)
 public class TripConfig {
 
@@ -29,5 +29,5 @@ public class TripConfig {
     }
 
     // @Bean
-    // public TripRepository tripRepository()
+    // public TripRepository tripRepository();
 }
