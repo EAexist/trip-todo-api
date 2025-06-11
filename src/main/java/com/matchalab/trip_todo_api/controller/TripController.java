@@ -1,5 +1,6 @@
 package com.matchalab.trip_todo_api.controller;
 
+import java.net.URI;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import lombok.RequiredArgsConstructor;
 
@@ -46,9 +48,9 @@ public class TripController {
      * Update the content of a Trip.
      */
     @PutMapping("/{tripId}")
-    public ResponseEntity<TripDTO> updateTrip(@PathVariable Long tripId, @RequestBody Trip newTrip) {
+    public ResponseEntity<TripDTO> updateTrip(@PathVariable Long tripId, @RequestBody TripDTO newTripDTO) {
         try {
-            return ResponseEntity.ok().body(TripService.putTrip(newTrip));
+            return ResponseEntity.ok().body(TripService.putTrip(tripId, newTripDTO));
         } catch (HttpClientErrorException e) {
             throw e;
         }
@@ -61,7 +63,8 @@ public class TripController {
     // public ResponseEntity<TripDTO> createTrip(@RequestBody Trip newTrip) {
     public ResponseEntity<TripDTO> createTrip() {
         try {
-            return ResponseEntity.created(null).body(TripService.createTrip());
+            TripDTO tripDTO = TripService.createTrip();
+            return ResponseEntity.created(getLocation(tripDTO.id())).body(tripDTO);
         } catch (HttpClientErrorException e) {
             throw e;
         }
@@ -71,9 +74,10 @@ public class TripController {
      * Provide the details of an Trip with the given id.
      */
     @PostMapping("/{tripId}/todo")
-    public ResponseEntity<TodoDTO> createTodo(@PathVariable Long tripId) {
+    public ResponseEntity<TodoDTO> createTodo(@PathVariable Long tripId, @RequestBody String category) {
         try {
-            return ResponseEntity.created(null).body(TripService.createTodo(tripId));
+            TodoDTO todoDTO = TripService.createTodo(tripId, category);
+            return ResponseEntity.created(getLocation(todoDTO.id())).body(todoDTO);
         } catch (HttpClientErrorException e) {
             throw e;
         }
@@ -102,5 +106,10 @@ public class TripController {
         } catch (HttpClientErrorException e) {
             throw e;
         }
+    }
+
+    private URI getLocation(Object resourceId) {
+        return ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{childId}").buildAndExpand(resourceId)
+                .toUri();
     }
 }

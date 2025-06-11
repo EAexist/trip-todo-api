@@ -28,4 +28,9 @@ public class TodoContent {
         this.title = title;
         this.iconId = iconId;
     }
+
+    public TodoContent(
+            String category) {
+        this.category = category;
+    }
 }
