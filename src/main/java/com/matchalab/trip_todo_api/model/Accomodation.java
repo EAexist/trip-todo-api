@@ -1,6 +1,10 @@
 package com.matchalab.trip_todo_api.model;
 
 import java.util.List;
+import java.util.Map;
+
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -35,5 +39,7 @@ public class Accomodation {
     private String checkoutTimeISOString;
     private String region;
     private String type;
-    private List<Link> links;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    private Map<String, String> links;
 }

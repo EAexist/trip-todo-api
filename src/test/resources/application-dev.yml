@@ -1,0 +1,11 @@
+spring:
+    datasource:
+        driver-class-name: org.postgresql.Driver
+        url: jdbc:postgresql://trip-todo-api-prod-postgresql.cbammiesaidt.ap-southeast-2.rds.amazonaws.com:5432/postgresql
+        username: matchalab_admin
+        password: hello_matcha
+    jpa:
+        show-sql: true
+        database: postgresql
+        hibernate:
+            ddl-auto: update
