@@ -14,15 +14,16 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import lombok.RequiredArgsConstructor;
-
 import com.matchalab.trip_todo_api.model.Accomodation;
-import com.matchalab.trip_todo_api.model.Todo;
+import com.matchalab.trip_todo_api.model.CreateTodoRequest;
+import com.matchalab.trip_todo_api.model.PresetTodoContent;
 import com.matchalab.trip_todo_api.model.DTO.TodoDTO;
-import com.matchalab.trip_todo_api.model.Trip;
-import com.matchalab.trip_todo_api.model.DTO.AccomodationDTO;
 import com.matchalab.trip_todo_api.model.DTO.TripDTO;
 import com.matchalab.trip_todo_api.service.TripService;
+
+import io.micrometer.common.lang.Nullable;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
@@ -74,10 +75,23 @@ public class TripController {
      * Provide the details of an Trip with the given id.
      */
     @PostMapping("/{tripId}/todo")
-    public ResponseEntity<TodoDTO> createTodo(@PathVariable Long tripId, @RequestBody String category) {
+    public ResponseEntity<TodoDTO> createTodo(@PathVariable Long tripId, @RequestBody CreateTodoRequest requestbody) {
         try {
-            TodoDTO todoDTO = TripService.createTodo(tripId, category);
+            TodoDTO todoDTO = TripService.createTodo(tripId, requestbody.getPresetId(), requestbody.getCategory());
             return ResponseEntity.created(getLocation(todoDTO.id())).body(todoDTO);
+        } catch (HttpClientErrorException e) {
+            throw e;
+        }
+    }
+
+    /**
+     * Provide the details of an Trip with the given id.
+     */
+    @GetMapping("/{tripId}/todoPreset")
+    public ResponseEntity<List<PresetTodoContent>> todoPreset(@PathVariable Long tripId) {
+        try {
+            List<PresetTodoContent> presetTodoContents = TripService.getTodoPreset(tripId);
+            return ResponseEntity.ok().body(presetTodoContents);
         } catch (HttpClientErrorException e) {
             throw e;
         }
@@ -112,4 +126,35 @@ public class TripController {
         return ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{childId}").buildAndExpand(resourceId)
                 .toUri();
     }
+
+    /**
+     * Provide the details of an Trip with the given id.
+     */
+    // @PostMapping("/{tripId}/customTodo")
+    // public ResponseEntity<TodoDTO> createCustomTodo(@PathVariable Long tripId,
+    // @RequestBody String category) {
+    // try {
+    // TodoDTO todoDTO = TripService.createCustomTodo(tripId, category);
+    // return ResponseEntity.created(getLocation(todoDTO.id())).body(todoDTO);
+    // } catch (HttpClientErrorException e) {
+    // throw e;
+    // }
+    // }
+
+    /**
+     * Provide the details of an Trip with the given id.
+     */
+    // @PostMapping("/{tripId}/presetTodo")
+    // public ResponseEntity<List<TodoDTO>> createPresetTodo(@PathVariable Long
+    // tripId,
+    // @RequestBody List<Long> presetIds) {
+    // try {
+    // List<TodoDTO> todoDTOs = TripService.createPresetTodo(tripId, presetIds);
+    // return ResponseEntity.status(HttpStatus.SEE_OTHER).location(getLocation(new
+    // Object())).body(todoDTOs);
+    // } catch (HttpClientErrorException e) {
+    // throw e;
+    // }
+    // }
+
 }
