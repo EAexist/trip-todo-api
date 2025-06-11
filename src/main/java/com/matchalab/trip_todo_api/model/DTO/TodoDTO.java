@@ -8,7 +8,7 @@ public record TodoDTO(
         int order_key,
         String note,
         String completeDateISOString,
-        Boolean isPreset,
+        Long presetId,
         String category,
         String type,
         String title,

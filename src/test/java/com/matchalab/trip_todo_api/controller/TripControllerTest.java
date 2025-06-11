@@ -1,50 +1,55 @@
-package com.matchalab.trip_todo_api.controller;
+// package com.matchalab.trip_todo_api.controller;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
+// import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.matchalab.trip_todo_api.service.TripService;
+// import org.junit.jupiter.api.BeforeEach;
+// import org.junit.jupiter.api.Test;
+// import org.springframework.beans.factory.annotation.Autowired;
+// import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+// import org.springframework.test.context.bean.override.mockito.MockitoBean;
+// import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(TripController.class)
-public class TripControllerTest {
+// import com.matchalab.trip_todo_api.service.TripService;
 
-    @Autowired
-    private MockMvc mockMvc;
+// @WebMvcTest(TripController.class)
+// public class TripControllerTest {
 
-    @MockitoBean
-    private TripService tripService;
+// @Autowired
+// private MockMvc mockMvc;
 
-    // @Test
-    // void testAccomodationDetail() throws Exception {
+// @Test
+// void testTrip() throws Exception {
+// assertEquals("", "");
 
-    // }
+// }
 
-    // @Test
-    // void testCreateAccomodation() throws Exception {
+// // @MockitoBean
+// // private TripService tripService;
 
-    // }
+// // @Test
+// // void testAccomodationDetail() throws Exception {
 
-    // @Test
-    // void testCreateTodo() throws Exception {
+// // assertEquals("", "");
 
-    // }
+// // }
 
-    // @Test
-    // void testCreateTrip() throws Exception {
+// // @Test
+// // void testCreateAccomodation() throws Exception {
 
-    // }
+// // }
 
-    // @Test
-    // void testTrip() throws Exception {
+// // @Test
+// // void testCreateTodo() throws Exception {
 
-    // }
+// // }
 
-    // @Test
-    // void testUpdateTrip() throws Exception {
+// // @Test
+// // void testCreateTrip() throws Exception {
 
-    // }
-}
+// // }
+
+// // @Test
+// // void testUpdateTrip() throws Exception {
+
+// // }
+// }

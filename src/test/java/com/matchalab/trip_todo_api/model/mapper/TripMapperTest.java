@@ -1,76 +1,57 @@
 package com.matchalab.trip_todo_api.model.mapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import com.matchalab.trip_todo_api.model.Accomodation;
+import com.matchalab.trip_todo_api.config.TestConfig;
 import com.matchalab.trip_todo_api.model.CustomTodoContent;
-import com.matchalab.trip_todo_api.model.Destination;
 import com.matchalab.trip_todo_api.model.Todo;
 import com.matchalab.trip_todo_api.model.TodoContent;
 import com.matchalab.trip_todo_api.model.Trip;
 import com.matchalab.trip_todo_api.model.DTO.TodoDTO;
 import com.matchalab.trip_todo_api.model.DTO.TripDTO;
+import com.matchalab.trip_todo_api.repository.PresetTodoContentRepository;
 
 @ExtendWith(SpringExtension.class)
+@Import({ TestConfig.class })
+@ContextConfiguration(classes = {
+        TripMapperImpl.class
+})
 public class TripMapperTest {
 
-    // @Autowired
+    @Autowired
+    private TodoDTO todoDTO;
+
+    @Autowired
+    private Todo todo;
+
+    @Autowired
+    private TripDTO tripDTO;
+
+    @Autowired
+    private Trip trip;
     /*
      * https://velog.io/@gwichanlee/MapStruct-Test-Code-%EC%9E%91%EC%84%B1
      * https://www.baeldung.com/mapstruct
      */
-    private final TripMapper tripMapper = Mappers.getMapper(TripMapper.class);
+    @Autowired
+    private TripMapper tripMapper;
+    // private final TripMapper tripMapper = Mappers.getMapper(TripMapper.class);
 
-    TodoDTO todoDTO = TodoDTO.builder()
-            .id(0L)
-            .order_key(0)
-            .note("미리미리 할 것")
-            .category("foreign")
-            .type("currency")
-            .title("환전")
-            .iconId("💱")
-            .completeDateISOString("2025-02-25T00:00:00.001Z").isPreset(false).build();
-
-    Todo todo = new Todo(0L,
-            "미리미리 할 것",
-            "2025-02-25T00:00:00.001Z",
-            0,
-            null,
-            null,
-            null);
-
-    List<Destination> destination = new ArrayList<Destination>(
-            Arrays.asList(new Destination[] { new Destination(), new Destination() }));
-    List<Todo> todolist = new ArrayList<Todo>(Arrays.asList(new Todo[] { todo, todo }));
-    List<Accomodation> accomodation = new ArrayList<Accomodation>(
-            Arrays.asList(new Accomodation[] { new Accomodation(), new Accomodation() }));
-
-    TripDTO tripDTO = TripDTO.builder()
-            .id(0L)
-            .title("Vaundy 보러 가는 도쿠시마 여행")
-            .startDateISOString("2025-02-20T00:00:00.001Z")
-            .endDateISOString("2025-02-25T00:00:00.001Z")
-            .destination(destination).todolist(todolist).accomodation(accomodation).build();
-
-    Trip trip = new Trip(0L,
-            "Vaundy 보러 가는 도쿠시마 여행",
-            "2025-02-20T00:00:00.001Z",
-            "2025-02-25T00:00:00.001Z",
-            destination,
-            todolist,
-            accomodation);
+    @MockitoBean
+    private PresetTodoContentRepository presetTodoContentRepository;
 
     @BeforeEach
     public void setUp() throws Exception {
@@ -80,7 +61,11 @@ public class TripMapperTest {
 
     @Test
     void testMapToTodo() {
+        // when(presetTodoContentRepository.findById(0L)).thenReturn(Optional.of(tripCreated));
+
         Todo mappedTodo = tripMapper.mapToTodo(todoDTO);
+        assertNotNull(todoDTO);
+        assertNotNull(mappedTodo);
         assertEquals(todo.getNote(), mappedTodo.getNote());
         assertEquals(todo.getCompleteDateISOString(), mappedTodo.getCompleteDateISOString());
         assertEquals(todo.getOrder_key(), mappedTodo.getOrder_key());
@@ -102,6 +87,8 @@ public class TripMapperTest {
     @Test
     void testMapToTodoDTO() {
         TodoDTO mappedTodoDTO = tripMapper.mapToTodoDTO(todo);
+        assertNotNull(todo);
+        assertNotNull(mappedTodoDTO);
         assertEquals(todoDTO.id(), mappedTodoDTO.id());
         assertEquals(todoDTO.order_key(), mappedTodoDTO.order_key());
         assertEquals(todoDTO.note(), mappedTodoDTO.note());
