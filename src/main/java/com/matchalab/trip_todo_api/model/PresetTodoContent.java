@@ -4,8 +4,10 @@ import java.util.List;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,10 +16,14 @@ import lombok.Setter;
 @Setter
 public class PresetTodoContent extends TodoContent {
 
-    @OneToMany(mappedBy = "todo", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Todo todo;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
 
-    public PresetTodoContent(Todo todo, Long id,
+    @OneToMany(mappedBy = "presetTodoContent", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Todo> todo;
+
+    public PresetTodoContent(List<Todo> todo, Long id,
             String category,
             String type,
             String title,

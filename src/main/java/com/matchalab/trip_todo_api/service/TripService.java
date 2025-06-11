@@ -2,6 +2,7 @@ package com.matchalab.trip_todo_api.service;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.matchalab.trip_todo_api.exception.TripNotFoundException;
@@ -17,13 +18,17 @@ import com.matchalab.trip_todo_api.repository.TripRepository;
 
 import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor
 @Service
+@RequiredArgsConstructor
 public class TripService {
 
+    @Autowired
     private final TripRepository tripRepository;
+    @Autowired
     private final TodoRepository todoRepository;
+    @Autowired
     private final AccomodationRepository accomodationRepository;
+    @Autowired
     private final TripMapper tripMapper;
 
     /**

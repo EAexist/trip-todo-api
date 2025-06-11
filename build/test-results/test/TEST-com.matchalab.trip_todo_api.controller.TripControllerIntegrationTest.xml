@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.matchalab.trip_todo_api.controller.TripControllerIntegrationTest" tests="1" skipped="0" failures="1" errors="0" timestamp="2025-06-11T09:06:36.873Z" hostname="DESKTOP-AP6T7CF" time="0.008">
+  <properties/>
+  <testcase name="testTrip()" classname="com.matchalab.trip_todo_api.controller.TripControllerIntegrationTest" time="0.008">
+    <failure message="java.lang.IllegalArgumentException: 'uri' should start with a path or be a complete HTTP URI: trip/0" type="java.lang.IllegalArgumentException">java.lang.IllegalArgumentException: 'uri' should start with a path or be a complete HTTP URI: trip/0
+	at org.springframework.util.Assert.isTrue(Assert.java:135)
+	at org.springframework.test.web.servlet.request.AbstractMockHttpServletRequestBuilder.initUri(AbstractMockHttpServletRequestBuilder.java:176)
+	at org.springframework.test.web.servlet.request.AbstractMockHttpServletRequestBuilder.uri(AbstractMockHttpServletRequestBuilder.java:165)
+	at org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder.uri(MockHttpServletRequestBuilder.java:79)
+	at org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get(MockMvcRequestBuilders.java:56)
+	at com.matchalab.trip_todo_api.controller.TripControllerIntegrationTest.testTrip(TripControllerIntegrationTest.java:32)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+</failure>
+  </testcase>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
