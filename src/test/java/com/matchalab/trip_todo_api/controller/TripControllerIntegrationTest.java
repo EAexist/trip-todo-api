@@ -1,6 +1,6 @@
 package com.matchalab.trip_todo_api.controller;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -10,10 +10,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.List;
+import java.util.Arrays;
 
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
@@ -31,15 +30,16 @@ import org.springframework.test.web.servlet.ResultActions;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.matchalab.trip_todo_api.config.TestConfig;
 import com.matchalab.trip_todo_api.config.TestSecurityConfig;
+import com.matchalab.trip_todo_api.exception.PresetTodoContentNotFoundException;
 import com.matchalab.trip_todo_api.model.Accomodation;
-import com.matchalab.trip_todo_api.model.Todo;
+import com.matchalab.trip_todo_api.model.CreateTodoRequest;
+import com.matchalab.trip_todo_api.model.PresetTodoContent;
 import com.matchalab.trip_todo_api.model.Trip;
 import com.matchalab.trip_todo_api.model.DTO.TodoDTO;
 import com.matchalab.trip_todo_api.model.DTO.TripDTO;
 import com.matchalab.trip_todo_api.model.mapper.TripMapper;
+import com.matchalab.trip_todo_api.repository.PresetTodoContentRepository;
 import com.matchalab.trip_todo_api.repository.TripRepository;
-
-import jakarta.transaction.Transactional;
 
 @AutoConfigureMockMvc
 @WithMockUser
@@ -57,6 +57,9 @@ public class TripControllerIntegrationTest {
 
     @Autowired
     private TripRepository tripRepository;
+
+    @Autowired
+    private PresetTodoContentRepository presetTodoContentRepository;
 
     @Autowired
     private TripMapper tripMapper;
@@ -85,7 +88,7 @@ public class TripControllerIntegrationTest {
     }
 
     @Test
-    void testTrip() throws Exception {
+    void trip_Given_ValidTripId_When_RequestGet_Then_CorrectTripDTO() throws Exception {
 
         Long id = tripRepository.save(savedTrip).getId();
 
@@ -107,7 +110,7 @@ public class TripControllerIntegrationTest {
     }
 
     @Test
-    void testCreateTrip() throws Exception {
+    void trip_Given_TripDTO_When_RequestPost_Then_CreateNewTrip() throws Exception {
 
         ResultActions result = mockMvc.perform(post("/trip"))
                 .andDo(print())
@@ -123,7 +126,7 @@ public class TripControllerIntegrationTest {
     }
 
     @Test
-    void testUpdateTrip() throws Exception {
+    void updateTrip_Given_ValidIdAndNewContent_When_RequestPut_Then_UpdateTrip() throws Exception {
 
         Long id = tripRepository.save(new Trip()).getId();
 
@@ -150,13 +153,13 @@ public class TripControllerIntegrationTest {
     }
 
     @Test
-    void testCreateTodo() throws Exception {
+    void createTodo_Given_ValidTripIdAndCustomTodoDTO_When_RequestPost_Then_CreateTodo() throws Exception {
 
         Long id = tripRepository.save(savedTrip).getId();
 
         ResultActions result = mockMvc.perform(post(String.format("/trip/%s/todo", id))
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString("reservation")))
+                .content(asJsonString(new CreateTodoRequest("reservation", null))))
                 .andDo(print())
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -167,18 +170,46 @@ public class TripControllerIntegrationTest {
                 .readValue(result.andReturn().getResponse().getContentAsString(), TodoDTO.class);
         result.andExpect(header().string("Location",
                 String.format("http://localhost/trip/%s/todo/%s", id, createdTodoDTO.id())));
-
-        // assertEquals(createdTodoDTO, getLastTodo(id));
     }
 
-    // @Transactional
-    // private TodoDTO getLastTodo(Long tripId) {
-    // return
-    // tripMapper.mapToTodoDTO(tripRepository.findById(tripId).get().getTodolist().get(-1));
-    // }
+    @Test
+    void createTodo_Given_ValidTripIdAndPresetTodoDTO_When_RequestPost_Then_CreateTodo() throws Exception {
+
+        Long id = tripRepository.save(savedTrip).getId();
+        Long presetId = 0L;
+        PresetTodoContent presetTodoContent = presetTodoContentRepository.findById(presetId)
+                .orElseThrow(() -> new PresetTodoContentNotFoundException(presetId));
+
+        ResultActions result = mockMvc.perform(post(String.format("/trip/%s/todo", id))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(asJsonString(new CreateTodoRequest(null, presetId))))
+                .andDo(print())
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("id")
+                        .isNotEmpty())
+                .andExpect(jsonPath("title").value(presetTodoContent.getTitle()))
+                .andExpect(jsonPath("type").value(presetTodoContent.getType()))
+                .andExpect(jsonPath("iconId").value(presetTodoContent.getIconId()));
+
+        TodoDTO createdTodoDTO = objectmapper
+                .readValue(result.andReturn().getResponse().getContentAsString(), TodoDTO.class);
+        result.andExpect(header().string("Location",
+                String.format("http://localhost/trip/%s/todo/%s", id, createdTodoDTO.id())));
+    }
 
     // @Test
-    void testAccomodationDetail() throws Exception {
+    void getTodoPreset_Given_PopulatedPresetDB_When_RequestGet_Then_AllPresets() throws Exception {
+
+        mockMvc.perform(get("/trip/todoPreset"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+        /* @TODO Assert that the response body includes all presets */
+    }
+
+    @Test
+    void accomodationDetail_Given_TripWithAccomodation_When_RequestGet_Then_AllAccomodations() throws Exception {
 
         Long id = 0L;
 
@@ -186,12 +217,14 @@ public class TripControllerIntegrationTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("id").isNotEmpty());
-
+                .andExpect(jsonPath("id").isNotEmpty())
+                .andExpect(jsonPath("$[0].title").value("Ligza"))
+                .andExpect(jsonPath("$[1].title").value("Vekrir"));
     }
 
+    /* @TODO */
     // @Test
-    void testCreateAccomodation() throws Exception {
+    void createAccomodation() throws Exception {
 
         Long id = 0L;
 
@@ -202,7 +235,6 @@ public class TripControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("id").isNotEmpty());
-
     }
 
     protected static String asJsonString(final Object obj) {
