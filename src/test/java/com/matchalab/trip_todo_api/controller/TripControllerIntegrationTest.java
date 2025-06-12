@@ -1,7 +1,9 @@
 package com.matchalab.trip_todo_api.controller;
 
+import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -10,6 +12,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -32,21 +36,29 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.matchalab.trip_todo_api.DataLoader;
 import com.matchalab.trip_todo_api.config.TestConfig;
 import com.matchalab.trip_todo_api.config.TestSecurityConfig;
+import com.matchalab.trip_todo_api.exception.NotFoundException;
 import com.matchalab.trip_todo_api.exception.PresetTodoContentNotFoundException;
 import com.matchalab.trip_todo_api.model.Accomodation;
+import com.matchalab.trip_todo_api.model.CustomTodoContent;
 import com.matchalab.trip_todo_api.model.request.CreateTodoRequest;
 import com.matchalab.trip_todo_api.model.Destination;
 import com.matchalab.trip_todo_api.model.PresetTodoContent;
+import com.matchalab.trip_todo_api.model.Todo;
+import com.matchalab.trip_todo_api.model.TodoContent;
 import com.matchalab.trip_todo_api.model.Trip;
 import com.matchalab.trip_todo_api.model.DTO.AccomodationDTO;
+import com.matchalab.trip_todo_api.model.DTO.PresetTodoContentDTO;
 import com.matchalab.trip_todo_api.model.DTO.TodoDTO;
 import com.matchalab.trip_todo_api.model.DTO.TripDTO;
 import com.matchalab.trip_todo_api.model.mapper.TripMapper;
 import com.matchalab.trip_todo_api.repository.AccomodationRepository;
+import com.matchalab.trip_todo_api.repository.CustomTodoContentRepository;
 import com.matchalab.trip_todo_api.repository.DestinationRepository;
 import com.matchalab.trip_todo_api.repository.PresetTodoContentRepository;
+import com.matchalab.trip_todo_api.repository.TodoRepository;
 import com.matchalab.trip_todo_api.repository.TripRepository;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -68,13 +80,10 @@ public class TripControllerIntegrationTest {
     private TripRepository tripRepository;
 
     @Autowired
+    private TodoRepository todoRepository;
+
+    @Autowired
     private PresetTodoContentRepository presetTodoContentRepository;
-
-    @Autowired
-    private AccomodationRepository accomodationRepository;
-
-    @Autowired
-    private DestinationRepository destinationRepository;
 
     @Autowired
     private TripMapper tripMapper;
@@ -92,38 +101,79 @@ public class TripControllerIntegrationTest {
     private Trip trip;
 
     @Autowired
-    private List<Accomodation> accomodations;
+    private Accomodation[] accomodations;
 
     @Autowired
-    private List<Destination> destinations;
+    private Destination[] destinations;
+
+    @Autowired
+    private CustomTodoContent customTodoContent;
+
+    @Autowired
+    private PresetTodoContent presetTodoContent;
+
+    @Autowired
+    private Todo presetTodo;
+
+    @Autowired
+    private Todo customTodo;
 
     private Trip savedTrip;
 
+    private TodoDTO todoDTOToPatch = new TodoDTO(null, 9, "새로운 노트", null, null, "reservation", null,
+            "새로운 할 일 이름", "🎁");
+
     @BeforeEach
     void setUp() {
-        tripRepository.deleteAll();
-        destinationRepository.deleteAll();
-        accomodationRepository.deleteAll();
-        savedTrip = tripRepository
-                .save(new Trip(trip));
+        // presetTodoContentRepository.deleteAll();
+        // customTodoContentRepository.deleteAll();
+        // todoRepository.deleteAll();
+        // tripRepository.deleteAll();
+        // destinationRepository.deleteAll();
+        // accomodationRepository.deleteAll();
 
-        List<Destination> savedDests = destinationRepository.saveAll(destinations.stream()
+        savedTrip = new Trip();
+        savedTrip.setDestination(Arrays.stream(destinations)
                 .map(dest -> {
                     Destination newDest = new Destination(dest);
                     newDest.setTrip(savedTrip);
                     return newDest;
                 })
                 .toList());
-        savedTrip.setDestination(savedDests);
-
-        List<Accomodation> savedAccs = accomodationRepository.saveAll(accomodations.stream()
+        savedTrip.setAccomodation(Arrays.stream(accomodations)
                 .map(acc -> {
                     Accomodation newAcc = new Accomodation(acc);
                     newAcc.setTrip(savedTrip);
                     return newAcc;
                 })
                 .toList());
-        savedTrip.setAccomodation(savedAccs);
+
+        final record TodoSet<T extends TodoContent>(
+                Todo todo,
+                T content) {
+        }
+        ;
+
+        List<Todo> savedTodos = Arrays
+                .stream(new TodoSet[] { new TodoSet<PresetTodoContent>(presetTodo, presetTodoContent),
+                        new TodoSet<CustomTodoContent>(customTodo, customTodoContent)
+                }).map(todoset -> {
+                    Todo newTodo = new Todo(todoset.todo);
+                    newTodo.setTrip(savedTrip);
+                    if (todoset.content instanceof PresetTodoContent) {
+                        newTodo.setPresetTodoContent(presetTodoContentRepository.findById(todoset.content.getId())
+                                .orElseThrow(() -> new NotFoundException(todoset.content.getId())));
+                    } else {
+                        newTodo.setCustomTodoContent(new CustomTodoContent((CustomTodoContent) todoset.content));
+                    }
+                    return newTodo;
+                }).toList();
+        savedTrip.setTodolist(savedTodos);
+        tripRepository.save(savedTrip);
+        log.info(String.format("[setUp] preset=%s",
+                asJsonString(tripMapper
+                        .mapToPresetTodoContentDTO(savedTrip.getTodolist().getFirst().getPresetTodoContent()))));
+        log.info(String.format("[setUp] savedTrip=%s", asJsonString(tripMapper.mapToTripDTO(savedTrip))));
     }
 
     @Test
@@ -162,26 +212,28 @@ public class TripControllerIntegrationTest {
     }
 
     @Test
-    void updateTrip_Given_ValidIdAndNewContent_When_RequestPut_Then_UpdateTrip() throws Exception {
+    void patchTrip_Given_ValidIdAndNewContent_When_RequestPut_Then_patchTrip() throws Exception {
 
-        Long id = tripRepository.save(new Trip()).getId();
+        TripDTO tripDTOToPatch = new TripDTO(null,
+                "새 여행 이름",
+                null,
+                null,
+                null,
+                null,
+                null);
 
-        TripDTO newTripDTO = TripDTO.builder().title(tripDTO.title())
-                .startDateISOString(tripDTO.startDateISOString()).endDateISOString(tripDTO.endDateISOString())
-                .accomodation(tripDTO.accomodation()).destination(tripDTO.destination()).todolist(tripDTO.todolist())
-                .build();
+        Long id = savedTrip.getId();
 
-        ResultActions result = mockMvc.perform(put(String.format("/trip/%s", id))
+        mockMvc.perform(patch(String.format("/trip/%s", id))
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(newTripDTO)))
+                .content(asJsonString(tripDTOToPatch)))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
-
-        Trip responseTrip = asObject(result, Trip.class);
-        assertThat(responseTrip).usingRecursiveComparison()
-                .ignoringFieldsOfTypes(Trip.class, Destination.class, Accomodation.class).ignoringFields("id")
-                .isEqualTo(trip);
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("id").value(id))
+                .andExpect(jsonPath("title").value(tripDTOToPatch.title()))
+                .andExpect(jsonPath("startDateISOString").value(savedTrip.getStartDateISOString()))
+                .andExpect(jsonPath("endDateISOString").value(savedTrip.getEndDateISOString()));
 
         /*
          * https://stackoverflow.com/questions/24927086/understanding-transactions-in-
@@ -236,6 +288,26 @@ public class TripControllerIntegrationTest {
                 String.format("http://localhost/trip/%s/todo/%s", id, createdTodoDTO.id())));
     }
 
+    @Test
+    void patchTodo_Given_NewContentAndOrderKey_When_RequestPatch_Then_UpdateTodo() throws Exception {
+
+        Long id = savedTrip.getId();
+
+        Long todoId = savedTrip.getTodolist().getFirst().getId();
+
+        ResultActions result = mockMvc.perform(patch(String.format("/trip/%s/todo/%s", id, todoId))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(asJsonString(todoDTOToPatch)))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+
+        TodoDTO actualTodoDTO = asObject(result, TodoDTO.class);
+        assertThat(actualTodoDTO).usingRecursiveComparison()
+                .ignoringFieldsOfTypes(TodoDTO.class, Destination.class, Accomodation.class).ignoringFields("id")
+                .isEqualTo(todoDTOToPatch);
+    }
+
     /* @TODO */
     // @Test
     void deleteTodo_When_Then() throws Exception {
@@ -251,15 +323,16 @@ public class TripControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
 
-        List<PresetTodoContent> actualPresetTodoContent = asObject(result,
-                new TypeReference<List<PresetTodoContent>>() {
+        List<PresetTodoContentDTO> actualPresetTodoContentDTO = asObject(result,
+                new TypeReference<List<PresetTodoContentDTO>>() {
                 });
 
-        List<PresetTodoContent> expectedPresetTodoContent = DataLoader.readPresetJson();
+        List<PresetTodoContentDTO> expectedPresetTodoContentDTO = DataLoader.readPresetJson().stream()
+                .map(tripMapper::mapToPresetTodoContentDTO).toList();
 
-        assertThat(actualPresetTodoContent).usingRecursiveComparison()
-                .ignoringFieldsOfTypes(PresetTodoContent.class).ignoringFields()
-                .isEqualTo(expectedPresetTodoContent);
+        assertThat(actualPresetTodoContentDTO).usingRecursiveComparison()
+                .ignoringFieldsOfTypes(PresetTodoContentDTO.class).ignoringFields()
+                .isEqualTo(expectedPresetTodoContentDTO);
     }
 
     @Test
@@ -277,7 +350,7 @@ public class TripControllerIntegrationTest {
         List<AccomodationDTO> actualAccomodationDTOs = asObject(result, new TypeReference<List<AccomodationDTO>>() {
         });
 
-        List<AccomodationDTO> expectedDTO = accomodations.stream().map(tripMapper::mapToAccomodationDTO).toList();
+        List<AccomodationDTO> expectedDTO = Arrays.stream(accomodations).map(tripMapper::mapToAccomodationDTO).toList();
 
         assertThat(actualAccomodationDTOs).usingRecursiveComparison()
                 .ignoringFieldsOfTypes(AccomodationDTO.class).ignoringFields(".*id")

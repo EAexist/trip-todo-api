@@ -51,10 +51,7 @@ public class DataLoader implements CommandLineRunner {
             ObjectMapper mapper = new ObjectMapper();
             presets = mapper.readValue((new ClassPathResource("static/todoPreset.json")).getInputStream(),
                     new TypeReference<List<PresetTodoContent>>() {
-                    }).stream().map(presetTodoContent -> {
-                        presetTodoContent.setTodo(new ArrayList<Todo>());
-                        return presetTodoContent;
-                    }).toList();
+                    });
 
         } catch (IOException e) {
             e.printStackTrace();

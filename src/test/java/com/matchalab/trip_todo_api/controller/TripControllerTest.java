@@ -49,7 +49,7 @@
 // // }
 
 // // @Test
-// // void testUpdateTrip() throws Exception {
+// // void testpatchTrip() throws Exception {
 
 // // }
 // }

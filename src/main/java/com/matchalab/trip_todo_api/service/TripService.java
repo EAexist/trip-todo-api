@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.matchalab.trip_todo_api.exception.NotFoundException;
 import com.matchalab.trip_todo_api.exception.PresetTodoContentNotFoundException;
 import com.matchalab.trip_todo_api.exception.TripNotFoundException;
@@ -14,6 +15,7 @@ import com.matchalab.trip_todo_api.model.PresetTodoContent;
 import com.matchalab.trip_todo_api.model.Todo;
 import com.matchalab.trip_todo_api.model.Trip;
 import com.matchalab.trip_todo_api.model.DTO.AccomodationDTO;
+import com.matchalab.trip_todo_api.model.DTO.PresetTodoContentDTO;
 import com.matchalab.trip_todo_api.model.DTO.TodoDTO;
 import com.matchalab.trip_todo_api.model.DTO.TripDTO;
 import com.matchalab.trip_todo_api.model.mapper.TripMapper;
@@ -60,7 +62,7 @@ public class TripService {
     /**
      * Update the content of a Trip.
      */
-    public TripDTO putTrip(Long tripId, TripDTO newTripDTO) {
+    public TripDTO patchTrip(Long tripId, TripDTO newTripDTO) {
         Trip trip = tripMapper.mapToTrip(newTripDTO);
         trip.setId(tripId);
         return tripMapper.mapToTripDTO(tripRepository.save(trip));
@@ -86,6 +88,17 @@ public class TripService {
     }
 
     /**
+     * Change contents or order_key of todo.
+     */
+    public TodoDTO patchTodo(Long todoId, TodoDTO newTodoDTO) {
+        Todo todo = tripMapper.mapToTodo(newTodoDTO);
+        todo.setId(todoId);
+        todoRepository.save(todo);
+
+        return tripMapper.mapToTodoDTO(todoRepository.save(todo));
+    }
+
+    /**
      * Create new todo.
      */
     public void deleteTodo(Long todoId) {
@@ -96,8 +109,8 @@ public class TripService {
     /**
      * Create new todo.
      */
-    public List<PresetTodoContent> getTodoPreset(Long tripId) {
-        return presetTodoContentRepository.findAll();
+    public List<PresetTodoContentDTO> getTodoPreset(Long tripId) {
+        return presetTodoContentRepository.findAll().stream().map(tripMapper::mapToPresetTodoContentDTO).toList();
     }
 
     /**
@@ -118,8 +131,8 @@ public class TripService {
         log.info(String.format("[createAccomodation] tripaccomodation:{}", trip));
         Accomodation newAccomodation = new Accomodation();
         newAccomodation.setTrip(trip);
-        AccomodationDTO accomodation = tripMapper.mapToAccomodationDTO(accomodationRepository.save(newAccomodation));
-        return accomodation;
+        trip.getAccomodation().add(newAccomodation);
+        return tripMapper.mapToAccomodationDTO(tripRepository.save(trip).getAccomodation().getLast());
     }
 
     /**
