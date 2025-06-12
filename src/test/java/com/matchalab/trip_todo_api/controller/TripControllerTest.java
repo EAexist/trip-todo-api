@@ -27,7 +27,7 @@
 // // private TripService tripService;
 
 // // @Test
-// // void testAccomodationDetail() throws Exception {
+// // void testaccomodationPlan() throws Exception {
 
 // // assertEquals("", "");
 

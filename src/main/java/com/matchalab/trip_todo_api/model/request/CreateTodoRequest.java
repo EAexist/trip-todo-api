@@ -13,5 +13,4 @@ public class CreateTodoRequest {
 
     @Nullable
     private Long presetId;
-    // getters and setters
 }
