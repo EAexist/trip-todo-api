@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -41,6 +42,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class TripMapperTest {
 
     @Autowired
+    private CustomTodoContent customTodoContent;
+
+    @Autowired
     private TodoDTO customTodoDTO;
 
     @Autowired
@@ -53,9 +57,9 @@ public class TripMapperTest {
     private Trip trip;
 
     @Autowired
-    private List<Accomodation> accomodations;
+    private Accomodation[] accomodations;
     @Autowired
-    private List<Destination> destinations;
+    private Destination[] destinations;
     /*
      * https://velog.io/@gwichanlee/MapStruct-Test-Code-%EC%9E%91%EC%84%B1
      * https://www.baeldung.com/mapstruct
@@ -69,14 +73,13 @@ public class TripMapperTest {
 
     @BeforeEach
     public void setUp() throws Exception {
-        CustomTodoContent customTodoContent = new CustomTodoContent(customTodo, 0L, "foreign", "currency", "환전", "💱");
         customTodo.setCustomTodoContent(customTodoContent);
 
-        accomodations.forEach(a -> a.setTrip(trip));
-        trip.setAccomodation(accomodations);
+        // Arrays.stream(accomodations).forEach(a -> a.setTrip(trip));
+        trip.setAccomodation(Arrays.asList(accomodations));
 
-        destinations.forEach(a -> a.setTrip(trip));
-        trip.setDestination(destinations);
+        // Arrays.stream(destinations).forEach(a -> a.setTrip(trip));
+        trip.setDestination(Arrays.asList(destinations));
     }
 
     @Test

@@ -7,9 +7,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,11 +18,12 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.matchalab.trip_todo_api.model.Accomodation;
-import com.matchalab.trip_todo_api.model.CreateTodoRequest;
 import com.matchalab.trip_todo_api.model.PresetTodoContent;
 import com.matchalab.trip_todo_api.model.DTO.AccomodationDTO;
+import com.matchalab.trip_todo_api.model.DTO.PresetTodoContentDTO;
 import com.matchalab.trip_todo_api.model.DTO.TodoDTO;
 import com.matchalab.trip_todo_api.model.DTO.TripDTO;
+import com.matchalab.trip_todo_api.model.request.CreateTodoRequest;
 import com.matchalab.trip_todo_api.service.TripService;
 
 import io.micrometer.common.lang.Nullable;
@@ -65,10 +67,10 @@ public class TripController {
     /**
      * Update the content of a Trip.
      */
-    @PutMapping("/{tripId}")
-    public ResponseEntity<TripDTO> updateTrip(@PathVariable Long tripId, @RequestBody TripDTO newTripDTO) {
+    @PatchMapping("/{tripId}")
+    public ResponseEntity<TripDTO> patchTrip(@PathVariable Long tripId, @RequestBody TripDTO newTripDTO) {
         try {
-            return ResponseEntity.ok().body(TripService.putTrip(tripId, newTripDTO));
+            return ResponseEntity.ok().body(TripService.patchTrip(tripId, newTripDTO));
         } catch (HttpClientErrorException e) {
             throw e;
         }
@@ -82,6 +84,19 @@ public class TripController {
         try {
             TodoDTO todoDTO = TripService.createTodo(tripId, requestbody.getPresetId(), requestbody.getCategory());
             return ResponseEntity.created(getLocation(todoDTO.id())).body(todoDTO);
+        } catch (HttpClientErrorException e) {
+            throw e;
+        }
+    }
+
+    /**
+     * Provide the details of an Trip with the given id.
+     */
+    @PatchMapping("/{tripId}/todo/{todoId}")
+    public ResponseEntity<TodoDTO> patchTodo(@PathVariable Long todoId, @RequestBody TodoDTO newTodoDTO) {
+        try {
+            TodoDTO todoDTO = TripService.patchTodo(todoId, newTodoDTO);
+            return ResponseEntity.ok().body(todoDTO);
         } catch (HttpClientErrorException e) {
             throw e;
         }
@@ -104,10 +119,10 @@ public class TripController {
      * Provide the details of an Trip with the given id.
      */
     @GetMapping("/{tripId}/todoPreset")
-    public ResponseEntity<List<PresetTodoContent>> todoPreset(@PathVariable Long tripId) {
+    public ResponseEntity<List<PresetTodoContentDTO>> todoPreset(@PathVariable Long tripId) {
         try {
-            List<PresetTodoContent> presetTodoContents = TripService.getTodoPreset(tripId);
-            return ResponseEntity.ok().body(presetTodoContents);
+            List<PresetTodoContentDTO> presetTodoContentDTOs = TripService.getTodoPreset(tripId);
+            return ResponseEntity.ok().body(presetTodoContentDTOs);
         } catch (HttpClientErrorException e) {
             throw e;
         }
