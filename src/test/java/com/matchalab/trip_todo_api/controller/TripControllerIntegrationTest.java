@@ -34,7 +34,7 @@ import com.matchalab.trip_todo_api.config.TestConfig;
 import com.matchalab.trip_todo_api.config.TestSecurityConfig;
 import com.matchalab.trip_todo_api.exception.PresetTodoContentNotFoundException;
 import com.matchalab.trip_todo_api.model.Accomodation;
-import com.matchalab.trip_todo_api.model.CreateTodoRequest;
+import com.matchalab.trip_todo_api.model.request.CreateTodoRequest;
 import com.matchalab.trip_todo_api.model.Destination;
 import com.matchalab.trip_todo_api.model.PresetTodoContent;
 import com.matchalab.trip_todo_api.model.Trip;

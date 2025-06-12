@@ -1,4 +1,4 @@
-package com.matchalab.trip_todo_api.model;
+package com.matchalab.trip_todo_api.model.request;
 
 import io.micrometer.common.lang.Nullable;
 import lombok.AllArgsConstructor;
