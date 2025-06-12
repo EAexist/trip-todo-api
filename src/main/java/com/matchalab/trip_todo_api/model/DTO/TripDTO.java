@@ -15,9 +15,9 @@ public record TripDTO(
         String title,
         String startDateISOString,
         String endDateISOString,
-        List<Destination> destination,
-        List<Todo> todolist,
-        List<Accomodation> accomodation) {
+        List<DestinationDTO> destination,
+        List<TodoDTO> todolist,
+        List<AccomodationDTO> accomodation) {
 
 }
 

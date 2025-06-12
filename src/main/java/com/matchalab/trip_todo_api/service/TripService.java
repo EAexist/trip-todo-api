@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.matchalab.trip_todo_api.exception.NotFoundException;
 import com.matchalab.trip_todo_api.exception.PresetTodoContentNotFoundException;
 import com.matchalab.trip_todo_api.exception.TripNotFoundException;
 import com.matchalab.trip_todo_api.model.Accomodation;
@@ -12,6 +13,7 @@ import com.matchalab.trip_todo_api.model.CustomTodoContent;
 import com.matchalab.trip_todo_api.model.PresetTodoContent;
 import com.matchalab.trip_todo_api.model.Todo;
 import com.matchalab.trip_todo_api.model.Trip;
+import com.matchalab.trip_todo_api.model.DTO.AccomodationDTO;
 import com.matchalab.trip_todo_api.model.DTO.TodoDTO;
 import com.matchalab.trip_todo_api.model.DTO.TripDTO;
 import com.matchalab.trip_todo_api.model.mapper.TripMapper;
@@ -21,7 +23,9 @@ import com.matchalab.trip_todo_api.repository.TodoRepository;
 import com.matchalab.trip_todo_api.repository.TripRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TripService {
@@ -46,20 +50,20 @@ public class TripService {
     }
 
     /**
+     * Create new empty trip.
+     */
+    public TripDTO createTrip() {
+        Trip trip = tripRepository.save(new Trip());
+        return tripMapper.mapToTripDTO(trip);
+    }
+
+    /**
      * Update the content of a Trip.
      */
     public TripDTO putTrip(Long tripId, TripDTO newTripDTO) {
         Trip trip = tripMapper.mapToTrip(newTripDTO);
         trip.setId(tripId);
         return tripMapper.mapToTripDTO(tripRepository.save(trip));
-    }
-
-    /**
-     * Create new empty trip.
-     */
-    public TripDTO createTrip() {
-        Trip trip = tripRepository.save(new Trip());
-        return tripMapper.mapToTripDTO(trip);
     }
 
     /**
@@ -84,6 +88,14 @@ public class TripService {
     /**
      * Create new todo.
      */
+    public void deleteTodo(Long todoId) {
+        accomodationRepository.findById(todoId).orElseThrow(() -> new NotFoundException(todoId));
+        todoRepository.deleteById(todoId);
+    }
+
+    /**
+     * Create new todo.
+     */
     public List<PresetTodoContent> getTodoPreset(Long tripId) {
         return presetTodoContentRepository.findAll();
     }
@@ -91,18 +103,31 @@ public class TripService {
     /**
      * Provide the details of a Accomodation with the given trip_id.
      */
-    public List<Accomodation> getAccomodation(Long tripId) {
-        List<Accomodation> accomodations = tripRepository.findById(tripId)
-                .orElseThrow(() -> new TripNotFoundException(tripId)).getAccomodation();
+    public List<AccomodationDTO> getAccomodation(Long tripId) {
+        List<AccomodationDTO> accomodations = tripRepository.findById(tripId)
+                .orElseThrow(() -> new TripNotFoundException(tripId)).getAccomodation().stream()
+                .map(accomodation -> tripMapper.mapToAccomodationDTO(accomodation)).toList();
         return accomodations;
     }
 
     /**
      * Create new empty accomodation.
      */
-    public Accomodation createAccomodation(Accomodation newAccomodation) {
-        Accomodation accomodation = accomodationRepository.save(newAccomodation);
+    public AccomodationDTO createAccomodation(Long tripId) {
+        Trip trip = tripRepository.findById(tripId).orElseThrow(() -> new TripNotFoundException(tripId));
+        log.info(String.format("[createAccomodation] tripaccomodation:{}", trip));
+        Accomodation newAccomodation = new Accomodation();
+        newAccomodation.setTrip(trip);
+        AccomodationDTO accomodation = tripMapper.mapToAccomodationDTO(accomodationRepository.save(newAccomodation));
         return accomodation;
+    }
+
+    /**
+     * Create new todo.
+     */
+    public void deleteAccomodation(Long accomodationId) {
+        accomodationRepository.findById(accomodationId).orElseThrow(() -> new NotFoundException(accomodationId));
+        accomodationRepository.deleteById(accomodationId);
     }
     /**
      * Create new empty custom todo.
