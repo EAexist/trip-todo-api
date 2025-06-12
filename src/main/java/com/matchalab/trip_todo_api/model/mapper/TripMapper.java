@@ -11,7 +11,6 @@ import org.mapstruct.ReportingPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.matchalab.trip_todo_api.exception.PresetTodoContentNotFoundException;
-import com.matchalab.trip_todo_api.exception.TripNotFoundException;
 import com.matchalab.trip_todo_api.model.Accomodation;
 import com.matchalab.trip_todo_api.model.CustomTodoContent;
 import com.matchalab.trip_todo_api.model.Destination;
@@ -21,11 +20,11 @@ import com.matchalab.trip_todo_api.model.TodoContent;
 import com.matchalab.trip_todo_api.model.Trip;
 import com.matchalab.trip_todo_api.model.DTO.AccomodationDTO;
 import com.matchalab.trip_todo_api.model.DTO.DestinationDTO;
+import com.matchalab.trip_todo_api.model.DTO.PresetTodoContentDTO;
 import com.matchalab.trip_todo_api.model.DTO.TodoDTO;
 import com.matchalab.trip_todo_api.model.DTO.TripDTO;
 import com.matchalab.trip_todo_api.repository.PresetTodoContentRepository;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -44,10 +43,10 @@ public abstract class TripMapper {
      */
 
     public TodoDTO mapToTodoDTO(Todo todo) {
-        TodoContent todoContent = todo.getPresetTodoContent() != null ? todo.getPresetTodoContent()
+        TodoContent todoContent = (todo.getPresetTodoContent() != null) ? todo.getPresetTodoContent()
                 : todo.getCustomTodoContent();
         return new TodoDTO(todo.getId(), todo.getOrder_key(), todo.getNote(), todo.getCompleteDateISOString(),
-                todo.getPresetTodoContent() != null ? todo.getPresetTodoContent().getId() : null,
+                (todo.getPresetTodoContent() != null) ? todo.getPresetTodoContent().getId() : null,
                 todoContent.getCategory(), todoContent.getType(),
                 todoContent.getTitle(), todoContent.getIconId());
 
@@ -78,10 +77,10 @@ public abstract class TripMapper {
     @Mapping(target = "presetTodoContent", expression = "java(mapPresetTodoContent(todoDTO))")
     public abstract Todo mapToTodo(TodoDTO todoDTO);
 
-    @AfterMapping
-    private void afterMapping(TodoDTO todoDTO, @MappingTarget Todo todo) {
-        todo.getCustomTodoContent().setTodo(todo);
-    }
+    // @AfterMapping
+    // private void afterMapping(TodoDTO todoDTO, @MappingTarget Todo todo) {
+    // todo.getCustomTodoContent().setTodo(todo);
+    // }
 
     /*
      * mapToTripDTO
@@ -152,4 +151,9 @@ public abstract class TripMapper {
     public abstract DestinationDTO mapToDestinationDTO(Destination destination);
 
     public abstract Destination mapToDestination(DestinationDTO destinationDTO);
+
+    public abstract PresetTodoContentDTO mapToPresetTodoContentDTO(PresetTodoContent presetTodoContent);
+
+    // public abstract PresetTodoContent mapToPresetTodoContent(PresetTodoContentDTO
+    // presetTodoContentDTO);
 }
