@@ -43,4 +43,13 @@ public class Trip {
     @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Accomodation> accomodation = new ArrayList<Accomodation>();
 
+    public Trip(Trip trip) {
+        this.title = trip.getTitle();
+        this.startDateISOString = trip.getStartDateISOString();
+        this.endDateISOString = trip.getEndDateISOString();
+        this.destination = trip.getDestination();
+        this.todolist = trip.getTodolist();
+        this.accomodation = trip.getAccomodation();
+    }
+
 }

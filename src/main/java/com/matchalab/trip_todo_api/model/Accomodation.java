@@ -15,12 +15,14 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Getter
 @Setter
 @AllArgsConstructor
+@RequiredArgsConstructor
 public class Accomodation {
 
     @Id
@@ -44,4 +46,20 @@ public class Accomodation {
 
     @JdbcTypeCode(SqlTypes.JSON)
     private Map<String, String> links;
+
+    public Accomodation(Accomodation accomodation) {
+        this.title = accomodation.getTitle();
+        this.trip = accomodation.getTrip();
+        this.roomTitle = accomodation.getRoomTitle();
+        this.numberofClient = accomodation.getNumberofClient();
+        this.clientName = accomodation.getClientName();
+        this.checkinDateISOString = accomodation.getCheckinDateISOString();
+        this.checkoutDateISOString = accomodation.getCheckoutDateISOString();
+        this.checkinStartTimeISOString = accomodation.getCheckinStartTimeISOString();
+        this.checkinEndTimeISOString = accomodation.getCheckinEndTimeISOString();
+        this.checkoutTimeISOString = accomodation.getCheckoutTimeISOString();
+        this.region = accomodation.getRegion();
+        this.type = accomodation.getType();
+        this.links = accomodation.getLinks();
+    }
 }

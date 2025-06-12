@@ -5,7 +5,4 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.matchalab.trip_todo_api.model.Todo;
 
 public interface TodoRepository extends JpaRepository<Todo, Long> {
-
-    // List<Todo> findByLastName(String lastName);
-    // Todo findById(long id);
 }

@@ -1,0 +1,79 @@
+[
+    {
+        "id": 1,
+        "type": "accomodation",
+        "category": "reservation",
+        "title": "숙소 예약",
+        "iconId": "🛌"
+    },
+    {
+        "id": 2,
+        "type": "passport",
+        "category": "foreign",
+        "title": "여권",
+        "iconId": "passport"
+    },
+    {
+        "id": 3,
+        "type": "currency",
+        "category": "foreign",
+        "title": "환전",
+        "iconId": "💱"
+    },
+    {
+        "id": 4,
+        "type": "roaming",
+        "category": "foreign",
+        "title": "로밍",
+        "iconId": "📶"
+    },
+    {
+        "id": 5,
+        "type": "visit-japan",
+        "category": "foreign",
+        "title": "Visit Japan",
+        "iconId": "📝"
+    },
+    {
+        "id": 7,
+        "type": "military-approvement",
+        "category": "foreign",
+        "title": "국외여행허가",
+        "iconId": "🛌"
+    },
+    {
+        "id": 8,
+        "type": "goods",
+        "category": "goods",
+        "title": "세면도구",
+        "iconId": "🧴"
+    },
+    {
+        "id": 9,
+        "type": "goods",
+        "category": "goods",
+        "title": "어댑터",
+        "iconId": "🔌"
+    },
+    {
+        "id": 10,
+        "type": "goods",
+        "category": "goods",
+        "title": "선글라스",
+        "iconId": "🕶"
+    },
+    {
+        "id": 11,
+        "type": "goods",
+        "category": "goods",
+        "title": "캐리어",
+        "iconId": "🧳"
+    },
+    {
+        "id": 12,
+        "type": "goods",
+        "category": "goods",
+        "title": "우산",
+        "iconId": "☂️"
+    }
+]
