@@ -16,17 +16,17 @@ import com.matchalab.trip_todo_api.service.TripService;
 // @ComponentScan(basePackageClasses = TripMapper.class)
 public class TripConfig {
 
-    @Bean
-    TripService tripService(
-            TripRepository tripRepository,
-            TodoRepository todoRepository,
-            AccomodationRepository accomodationRepository,
-            TripMapper tripMapper) {
-        return new TripService(tripRepository,
-                todoRepository,
-                accomodationRepository,
-                tripMapper);
-    }
+    // @Bean
+    // TripService tripService(
+    // TripRepository tripRepository,
+    // TodoRepository todoRepository,
+    // AccomodationRepository accomodationRepository,
+    // TripMapper tripMapper) {
+    // return new TripService(tripRepository,
+    // todoRepository,
+    // accomodationRepository,
+    // tripMapper);
+    // }
 
     // @Bean
     // public TripRepository tripRepository();

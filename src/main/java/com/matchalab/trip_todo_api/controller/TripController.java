@@ -3,7 +3,9 @@ package com.matchalab.trip_todo_api.controller;
 import java.net.URI;
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,6 +19,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.matchalab.trip_todo_api.model.Accomodation;
 import com.matchalab.trip_todo_api.model.CreateTodoRequest;
 import com.matchalab.trip_todo_api.model.PresetTodoContent;
+import com.matchalab.trip_todo_api.model.DTO.AccomodationDTO;
 import com.matchalab.trip_todo_api.model.DTO.TodoDTO;
 import com.matchalab.trip_todo_api.model.DTO.TripDTO;
 import com.matchalab.trip_todo_api.service.TripService;
@@ -46,18 +49,6 @@ public class TripController {
     }
 
     /**
-     * Update the content of a Trip.
-     */
-    @PutMapping("/{tripId}")
-    public ResponseEntity<TripDTO> updateTrip(@PathVariable Long tripId, @RequestBody TripDTO newTripDTO) {
-        try {
-            return ResponseEntity.ok().body(TripService.putTrip(tripId, newTripDTO));
-        } catch (HttpClientErrorException e) {
-            throw e;
-        }
-    }
-
-    /**
      * Provide the details of an Trip with the given id.
      */
     @PostMapping("")
@@ -72,6 +63,18 @@ public class TripController {
     }
 
     /**
+     * Update the content of a Trip.
+     */
+    @PutMapping("/{tripId}")
+    public ResponseEntity<TripDTO> updateTrip(@PathVariable Long tripId, @RequestBody TripDTO newTripDTO) {
+        try {
+            return ResponseEntity.ok().body(TripService.putTrip(tripId, newTripDTO));
+        } catch (HttpClientErrorException e) {
+            throw e;
+        }
+    }
+
+    /**
      * Provide the details of an Trip with the given id.
      */
     @PostMapping("/{tripId}/todo")
@@ -79,6 +82,19 @@ public class TripController {
         try {
             TodoDTO todoDTO = TripService.createTodo(tripId, requestbody.getPresetId(), requestbody.getCategory());
             return ResponseEntity.created(getLocation(todoDTO.id())).body(todoDTO);
+        } catch (HttpClientErrorException e) {
+            throw e;
+        }
+    }
+
+    /**
+     * Provide the details of an Trip with the given id.
+     */
+    @DeleteMapping("/{tripId}/todo/{todoId}")
+    public ResponseEntity<Void> deleteTodo(@PathVariable Long todoId) {
+        try {
+            TripService.deleteTodo(todoId);
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         } catch (HttpClientErrorException e) {
             throw e;
         }
@@ -101,7 +117,7 @@ public class TripController {
      * Provide the details of an Trip with the given id.
      */
     @GetMapping("/{tripId}/accomodation")
-    public ResponseEntity<List<Accomodation>> accomodationDetail(@PathVariable Long tripId) {
+    public ResponseEntity<List<AccomodationDTO>> accomodationPlan(@PathVariable Long tripId) {
         try {
             return ResponseEntity.ok().body(TripService.getAccomodation(tripId));
         } catch (HttpClientErrorException e) {
@@ -113,10 +129,20 @@ public class TripController {
      * Provide the details of an Trip with the given id.
      */
     @PostMapping("/{tripId}/accomodation")
-    public ResponseEntity<Accomodation> createAccomodation(@PathVariable Long tripId,
-            @RequestBody Accomodation newAccomodation) {
+    public ResponseEntity<AccomodationDTO> createAccomodation(@PathVariable Long tripId) {
         try {
-            return ResponseEntity.ok().body(TripService.createAccomodation(newAccomodation));
+            AccomodationDTO accomodationDTO = TripService.createAccomodation(tripId);
+            return ResponseEntity.created(getLocation(accomodationDTO.id())).body(accomodationDTO);
+        } catch (HttpClientErrorException e) {
+            throw e;
+        }
+    }
+
+    @DeleteMapping("/{tripId}/accomodation/{accomodationId}")
+    public ResponseEntity<Void> deleteAccomodation(@PathVariable Long accomodationId) {
+        try {
+            TripService.deleteAccomodation(accomodationId);
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         } catch (HttpClientErrorException e) {
             throw e;
         }
