@@ -121,7 +121,7 @@ public class TestConfig {
 
     @Bean
     PresetTodoContent presetTodoContent() {
-        return new PresetTodoContent(Arrays.asList(new Todo[] {}), 1L, "foreign",
+        return new PresetTodoContent(1L, "foreign",
                 "currency", "환전", "💱");
     }
 
@@ -135,7 +135,7 @@ public class TestConfig {
     TodoDTO presetTodoDTO() {
         return TodoDTO.builder()
                 .id(null)
-                .order_key(0)
+                .orderKey(0)
                 .note("환전은 미리미리 할 것")
                 .category("foreign")
                 .type("currency")
@@ -160,7 +160,7 @@ public class TestConfig {
     TodoDTO customTodoDTO() {
         return TodoDTO.builder()
                 .id(null)
-                .order_key(1)
+                .orderKey(1)
                 .note("카메라 필름 챙겼는지 확인할 것")
                 .category("goods")
                 .type("goods")

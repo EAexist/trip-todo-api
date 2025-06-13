@@ -21,6 +21,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.matchalab.trip_todo_api.config.TestConfig;
 import com.matchalab.trip_todo_api.model.Accomodation;
 import com.matchalab.trip_todo_api.model.CustomTodoContent;
@@ -31,6 +32,9 @@ import com.matchalab.trip_todo_api.model.Trip;
 import com.matchalab.trip_todo_api.model.DTO.TodoDTO;
 import com.matchalab.trip_todo_api.model.DTO.TripDTO;
 import com.matchalab.trip_todo_api.repository.PresetTodoContentRepository;
+
+import lombok.extern.slf4j.Slf4j;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
@@ -39,6 +43,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         TripMapperImpl.class
 })
 @TestInstance(Lifecycle.PER_CLASS)
+@Slf4j
 public class TripMapperTest {
 
     @Autowired
@@ -119,6 +124,13 @@ public class TripMapperTest {
     @Test
     void mapToTripDTO_Given_trip_When_mapped_Then_correctTripDTO() {
         TripDTO mappedTripDTO = tripMapper.mapToTripDTO(trip);
+        ObjectMapper mapper = new ObjectMapper();
+        // try {
+        // log.info(String.format("mappedTripDTO : %s",
+        // mapper.writeValueAsString(mappedTripDTO)));
+        // log.info(String.format("tripDTO : %s", mapper.writeValueAsString(tripDTO)));
+        // } catch (Exception e) {
+        // }
         assertThat(tripDTO).usingRecursiveComparison()
                 .ignoringFieldsOfTypes().ignoringFields()
                 .isEqualTo(mappedTripDTO);

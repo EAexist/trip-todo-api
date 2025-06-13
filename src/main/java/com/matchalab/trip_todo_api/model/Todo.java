@@ -28,7 +28,7 @@ public class Todo {
 
     private String note;
     private String completeDateISOString;
-    private int order_key;
+    private int orderKey;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "trip_id")
@@ -46,7 +46,7 @@ public class Todo {
     public Todo(Todo todo) {
         this.note = todo.getNote();
         this.completeDateISOString = todo.getCompleteDateISOString();
-        this.order_key = todo.getOrder_key();
+        this.orderKey = todo.getOrderKey();
         this.customTodoContent = todo.getCustomTodoContent();
         this.presetTodoContent = todo.getPresetTodoContent();
     }

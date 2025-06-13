@@ -13,9 +13,9 @@ public record TripDTO(
         String title,
         String startDateISOString,
         String endDateISOString,
-        @NonNull List<DestinationDTO> destination,
-        @NonNull List<TodoDTO> todolist,
-        @NonNull List<AccomodationDTO> accomodation) {
+        List<DestinationDTO> destination,
+        List<TodoDTO> todolist,
+        List<AccomodationDTO> accomodation) {
 
     public TripDTO(Long id,
             String title,
@@ -28,8 +28,8 @@ public record TripDTO(
         this.title = title;
         this.startDateISOString = startDateISOString;
         this.endDateISOString = endDateISOString;
-        this.destination = (destination != null) ? destination : new ArrayList<DestinationDTO>();
-        this.todolist = (todolist != null) ? todolist : new ArrayList<TodoDTO>();
-        this.accomodation = (accomodation != null) ? accomodation : new ArrayList<AccomodationDTO>();
+        this.destination = destination;
+        this.todolist = todolist;
+        this.accomodation = accomodation;
     }
 }
