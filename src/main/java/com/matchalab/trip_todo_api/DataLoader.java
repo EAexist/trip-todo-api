@@ -10,10 +10,12 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.matchalab.trip_todo_api.model.PresetTodoContent;
 import com.matchalab.trip_todo_api.model.Todo;
+import com.matchalab.trip_todo_api.model.DTO.PresetTodoContentDTO;
 import com.matchalab.trip_todo_api.repository.PresetTodoContentRepository;
 
 import jakarta.transaction.Transactional;
@@ -32,12 +34,11 @@ public class DataLoader implements CommandLineRunner {
     // @Autowired
     // private DestinationRepository destinationRepository;
 
-    @Transactional
     @Override
+    @Transactional
     public void run(String... args) throws Exception {
 
         try {
-            presetTodoContentRepository.deleteAll();
             presetTodoContentRepository.saveAll(readPresetJson());
 
         } catch (DataIntegrityViolationException ignore) {

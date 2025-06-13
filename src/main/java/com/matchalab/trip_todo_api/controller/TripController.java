@@ -18,8 +18,10 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.matchalab.trip_todo_api.model.Accomodation;
+import com.matchalab.trip_todo_api.model.Destination;
 import com.matchalab.trip_todo_api.model.PresetTodoContent;
 import com.matchalab.trip_todo_api.model.DTO.AccomodationDTO;
+import com.matchalab.trip_todo_api.model.DTO.DestinationDTO;
 import com.matchalab.trip_todo_api.model.DTO.PresetTodoContentDTO;
 import com.matchalab.trip_todo_api.model.DTO.TodoDTO;
 import com.matchalab.trip_todo_api.model.DTO.TripDTO;
@@ -131,14 +133,38 @@ public class TripController {
     /**
      * Provide the details of an Trip with the given id.
      */
-    @GetMapping("/{tripId}/accomodation")
-    public ResponseEntity<List<AccomodationDTO>> accomodationPlan(@PathVariable Long tripId) {
+    @PostMapping("/{tripId}/destination")
+    public ResponseEntity<DestinationDTO> createDestination(@PathVariable Long tripId) {
         try {
-            return ResponseEntity.ok().body(TripService.getAccomodation(tripId));
+            DestinationDTO destinationDTO = TripService.createDestination(tripId);
+            return ResponseEntity.created(getLocation(destinationDTO.id())).body(destinationDTO);
         } catch (HttpClientErrorException e) {
             throw e;
         }
     }
+
+    @DeleteMapping("/{tripId}/destination/{destinationId}")
+    public ResponseEntity<Void> deleteDestination(@PathVariable Long destinationId) {
+        try {
+            TripService.deleteDestination(destinationId);
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        } catch (HttpClientErrorException e) {
+            throw e;
+        }
+    }
+
+    /**
+     * Provide the details of an Trip with the given id.
+     */
+    // @GetMapping("/{tripId}/accomodation")
+    // public ResponseEntity<List<AccomodationDTO>> accomodationPlan(@PathVariable
+    // Long tripId) {
+    // try {
+    // return ResponseEntity.ok().body(TripService.getAccomodation(tripId));
+    // } catch (HttpClientErrorException e) {
+    // throw e;
+    // }
+    // }
 
     /**
      * Provide the details of an Trip with the given id.
@@ -148,6 +174,20 @@ public class TripController {
         try {
             AccomodationDTO accomodationDTO = TripService.createAccomodation(tripId);
             return ResponseEntity.created(getLocation(accomodationDTO.id())).body(accomodationDTO);
+        } catch (HttpClientErrorException e) {
+            throw e;
+        }
+    }
+
+    /**
+     * Provide the details of an Trip with the given id.
+     */
+    @PatchMapping("/{tripId}/accomodation/{accomodationId}")
+    public ResponseEntity<AccomodationDTO> patchAccomodation(@PathVariable Long accomodationId,
+            @RequestBody AccomodationDTO newAccomodationDTO) {
+        try {
+            AccomodationDTO accomodationDTO = TripService.patchAccomodation(accomodationId, newAccomodationDTO);
+            return ResponseEntity.ok().body(accomodationDTO);
         } catch (HttpClientErrorException e) {
             throw e;
         }
