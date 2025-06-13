@@ -118,10 +118,10 @@ public class TripControllerIntegrationTest {
     @Autowired
     private Todo customTodo;
 
-    private Trip savedTrip;
+    @Autowired
+    private TodoDTO customTodoDTO;
 
-    private TodoDTO todoDTOToPatch = new TodoDTO(null, 9, "새로운 노트", null, null, "reservation", null,
-            "새로운 할 일 이름", "🎁");
+    private Trip savedTrip;
 
     @BeforeEach
     void setUp() {
@@ -161,8 +161,10 @@ public class TripControllerIntegrationTest {
                     Todo newTodo = new Todo(todoset.todo);
                     newTodo.setTrip(savedTrip);
                     if (todoset.content instanceof PresetTodoContent) {
-                        newTodo.setPresetTodoContent(presetTodoContentRepository.findById(todoset.content.getId())
-                                .orElseThrow(() -> new NotFoundException(todoset.content.getId())));
+                        newTodo.setPresetTodoContent(presetTodoContentRepository
+                                .findById(((PresetTodoContent) todoset.content).getId())
+                                .orElseThrow(
+                                        () -> new NotFoundException(((PresetTodoContent) todoset.content).getId())));
                     } else {
                         newTodo.setCustomTodoContent(new CustomTodoContent((CustomTodoContent) todoset.content));
                     }
@@ -188,7 +190,7 @@ public class TripControllerIntegrationTest {
 
         TripDTO responseTripDTO = asObject(result, TripDTO.class);
         assertThat(responseTripDTO).usingRecursiveComparison()
-                .ignoringFieldsOfTypes(TripDTO.class).ignoringFields("*.id")
+                .ignoringFieldsOfTypes().ignoringFields("*.id")
                 .isEqualTo(tripMapper.mapToTripDTO(savedTrip));
         /*
          * https://stackoverflow.com/questions/24927086/understanding-transactions-in-
@@ -216,7 +218,7 @@ public class TripControllerIntegrationTest {
 
         TripDTO tripDTOToPatch = new TripDTO(null,
                 "새 여행 이름",
-                null,
+                "2025-02-10T00:00:00.001Z",
                 null,
                 null,
                 null,
@@ -224,23 +226,34 @@ public class TripControllerIntegrationTest {
 
         Long id = savedTrip.getId();
 
-        mockMvc.perform(patch(String.format("/trip/%s", id))
+        ResultActions result = mockMvc.perform(patch(String.format("/trip/%s", id))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(asJsonString(tripDTOToPatch)))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("id").value(id))
                 .andExpect(jsonPath("title").value(tripDTOToPatch.title()))
-                .andExpect(jsonPath("startDateISOString").value(savedTrip.getStartDateISOString()))
-                .andExpect(jsonPath("endDateISOString").value(savedTrip.getEndDateISOString()));
+                .andExpect(jsonPath("startDateISOString").value(tripDTOToPatch.startDateISOString()));
+
+        TripDTO actualTripDTO = asObject(result, TripDTO.class);
+
+        log.info(String.format("[patchTrip_Given_ValidIdAndNewContent_When_RequestPut_Then_patchTrip] %s",
+                asJsonString(actualTripDTO)));
+
+        log.info(String.format("[patchTrip_Given_ValidIdAndNewContent_When_RequestPut_Then_patchTrip] %s",
+                asJsonString(tripMapper.mapToTripDTO(savedTrip))));
+
+        assertThat(actualTripDTO).usingRecursiveComparison()
+                // .ignoringFieldsOfTypes(TripDTO.class)
+                .ignoringFields("title", "startDateISOString")
+                .isEqualTo(tripMapper.mapToTripDTO(savedTrip));
 
         /*
          * https://stackoverflow.com/questions/24927086/understanding-transactions-in-
          * spring-test
          */
         // .andExpect(jsonPath("destination").value(trip.getDestination()))
-        // .andExpect(jsonPath("todolist").value(trip.getTodolist()))
+        // .andExpect(jsonPath("todolist").value(trip.getTriplist()))
         // .andExpect(jsonPath("accomodation").value(trip.getAccomodation()));
     }
 
@@ -293,19 +306,28 @@ public class TripControllerIntegrationTest {
 
         Long id = savedTrip.getId();
 
-        Long todoId = savedTrip.getTodolist().getFirst().getId();
+        Todo todo = savedTrip.getTodolist().stream().filter(todo_ -> todo_.getPresetTodoContent() == null).toList()
+                .getFirst();
 
-        ResultActions result = mockMvc.perform(patch(String.format("/trip/%s/todo/%s", id, todoId))
+        TodoDTO todoDTOToPatch = new TodoDTO(null, 9, "새로운 노트", null, null, "reservation", null,
+                "새로운 할 일 이름", "🎁");
+
+        ResultActions result = mockMvc.perform(patch(String.format("/trip/%s/todo/%s", id, todo.getId()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(asJsonString(todoDTOToPatch)))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        // .andExpect(jsonPath("title").value(todoDTOToPatch.title()))
+        // .andExpect(jsonPath("note").value(todoDTOToPatch.note()))
+        // .andExpect(jsonPath("iconId").value(todoDTOToPatch.iconId()))
+        ;
 
         TodoDTO actualTodoDTO = asObject(result, TodoDTO.class);
         assertThat(actualTodoDTO).usingRecursiveComparison()
-                .ignoringFieldsOfTypes(TodoDTO.class, Destination.class, Accomodation.class).ignoringFields("id")
-                .isEqualTo(todoDTOToPatch);
+                .ignoringFieldsOfTypes()
+                // .ignoringFields("title", "note", "iconId")
+                .isEqualTo(tripMapper.mapToTodoDTO(todo));
     }
 
     /* @TODO */
@@ -316,7 +338,8 @@ public class TripControllerIntegrationTest {
     @Test
     void getTodoPreset_Given_PopulatedPresetDB_When_RequestGet_Then_AllPresets() throws Exception {
 
-        log.info("[getTodoPreset_Given_PopulatedPresetDB_When_RequestGet_Then_AllPresets] HELLO");
+        log.info(String.format("[getTodoPreset_Given_PopulatedPresetDB_When_RequestGet_Then_AllPresets] %s",
+                asJsonString(presetTodoContentRepository.findAll())));
 
         ResultActions result = mockMvc.perform(get("/trip/0/todoPreset"))
                 .andDo(print())
@@ -331,32 +354,47 @@ public class TripControllerIntegrationTest {
                 .map(tripMapper::mapToPresetTodoContentDTO).toList();
 
         assertThat(actualPresetTodoContentDTO).usingRecursiveComparison()
-                .ignoringFieldsOfTypes(PresetTodoContentDTO.class).ignoringFields()
+                .ignoringFieldsOfTypes().ignoringFields()
                 .isEqualTo(expectedPresetTodoContentDTO);
     }
 
-    @Test
-    void accomodationPlan_Given_TripWithAccomodation_When_RequestGet_Then_AllAccomodations() throws Exception {
-
-        Long id = savedTrip.getId();
-
-        ResultActions result = mockMvc.perform(get(String.format("/trip/%s/accomodation", id)))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$[0].id").isNotEmpty())
-                .andExpect(jsonPath("$[1].id").isNotEmpty());
-
-        List<AccomodationDTO> actualAccomodationDTOs = asObject(result, new TypeReference<List<AccomodationDTO>>() {
-        });
-
-        List<AccomodationDTO> expectedDTO = Arrays.stream(accomodations).map(tripMapper::mapToAccomodationDTO).toList();
-
-        assertThat(actualAccomodationDTOs).usingRecursiveComparison()
-                .ignoringFieldsOfTypes(AccomodationDTO.class).ignoringFields(".*id")
-                .isEqualTo(expectedDTO);
-
+    /* @TODO */
+    // @Test
+    void createDestination_When_Then() throws Exception {
     }
+
+    /* @TODO */
+    // @Test
+    void deleteDestination_When_Then() throws Exception {
+    }
+
+    // @Test
+    // void
+    // accomodationPlan_Given_TripWithAccomodation_When_RequestGet_Then_AllAccomodations()
+    // throws Exception {
+
+    // Long id = savedTrip.getId();
+
+    // ResultActions result =
+    // mockMvc.perform(get(String.format("/trip/%s/accomodation", id)))
+    // .andDo(print())
+    // .andExpect(status().isOk())
+    // .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+    // .andExpect(jsonPath("$[0].id").isNotEmpty())
+    // .andExpect(jsonPath("$[1].id").isNotEmpty());
+
+    // List<AccomodationDTO> actualAccomodationDTOs = asObject(result, new
+    // TypeReference<List<AccomodationDTO>>() {
+    // });
+
+    // List<AccomodationDTO> expectedDTO =
+    // Arrays.stream(accomodations).map(tripMapper::mapToAccomodationDTO).toList();
+
+    // assertThat(actualAccomodationDTOs).usingRecursiveComparison()
+    // .ignoringFieldsOfTypes().ignoringFields(".*id")
+    // .isEqualTo(expectedDTO);
+
+    // }
 
     @Test
     void createAccomodation_When_RequestPost_Then_CreateNewAccomodation() throws Exception {

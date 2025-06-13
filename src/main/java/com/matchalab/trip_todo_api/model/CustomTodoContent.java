@@ -33,8 +33,8 @@ public class CustomTodoContent extends TodoContent {
             String type,
             String title,
             String iconId) {
-        super(id, category, type, title, iconId);
-        // this.todo = todo;
+        super(category, type, title, iconId);
+        this.id = id;
     }
 
     public CustomTodoContent(Todo todo, String category) {
@@ -43,7 +43,7 @@ public class CustomTodoContent extends TodoContent {
     }
 
     public CustomTodoContent(CustomTodoContent customTodoContent) {
-        super(customTodoContent.getId(), customTodoContent.getCategory(), customTodoContent.getType(),
+        super(customTodoContent.getCategory(), customTodoContent.getType(),
                 customTodoContent.getTitle(), customTodoContent.getIconId());
     }
 }
