@@ -21,8 +21,8 @@ import com.matchalab.trip_todo_api.repository.PresetTodoContentRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
-@Component
 @Slf4j
+// @Component
 public class DataLoader implements CommandLineRunner {
 
     @Autowired
