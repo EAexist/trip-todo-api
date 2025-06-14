@@ -30,12 +30,9 @@ import com.matchalab.trip_todo_api.repository.PresetTodoContentRepository;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
-// @RequiredArgsConstructor
+// @Mapper(componentModel = "spring", unmappedTargetPolicy =
+// ReportingPolicy.IGNORE)
 public abstract class TripMapper {
-
-    // @Autowired
-    // protected TodoRepository todoRepository;
 
     @Autowired
     protected PresetTodoContentRepository presetTodoContentRepository;
