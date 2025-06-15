@@ -25,7 +25,7 @@ public class WebSecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf((csrf) -> csrf
-                        .ignoringRequestMatchers("/*"))
+                        .ignoringRequestMatchers("/**"))
                 // if Spring MVC is on classpath and no CorsConfigurationSource is provided,
                 // Spring Security will use CORS configuration provided to Spring MVC
                 .cors(Customizer.withDefaults())

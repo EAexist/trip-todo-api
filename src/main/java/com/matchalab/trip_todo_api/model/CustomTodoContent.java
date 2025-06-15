@@ -37,8 +37,8 @@ public class CustomTodoContent extends TodoContent {
         this.id = id;
     }
 
-    public CustomTodoContent(Todo todo, String category) {
-        super(category);
+    public CustomTodoContent(Todo todo, String category, String type) {
+        super(category, type);
         // this.todo = todo;
     }
 
