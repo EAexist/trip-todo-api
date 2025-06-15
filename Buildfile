@@ -1,1 +1,1 @@
-build: ./gradlew clean jar
+build: ./gradlew clean build -x test
