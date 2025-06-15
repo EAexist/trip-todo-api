@@ -22,6 +22,7 @@ import com.matchalab.trip_todo_api.model.DTO.TodoDTO;
 import com.matchalab.trip_todo_api.model.DTO.TripDTO;
 import com.matchalab.trip_todo_api.model.mapper.TripMapper;
 import com.matchalab.trip_todo_api.repository.AccomodationRepository;
+import com.matchalab.trip_todo_api.repository.CustomTodoContentRepository;
 import com.matchalab.trip_todo_api.repository.DestinationRepository;
 import com.matchalab.trip_todo_api.repository.PresetTodoContentRepository;
 import com.matchalab.trip_todo_api.repository.TodoRepository;
@@ -41,6 +42,8 @@ public class TripService {
     private final TodoRepository todoRepository;
     @Autowired
     private final PresetTodoContentRepository presetTodoContentRepository;
+    @Autowired
+    private final CustomTodoContentRepository customTodoContentRepository;
     @Autowired
     private final DestinationRepository destinationRepository;
     @Autowired
@@ -86,7 +89,7 @@ public class TripService {
             newTodo.setPresetTodoContent(presetTodoContentRepository.findById(presetId)
                     .orElseThrow(() -> new PresetTodoContentNotFoundException(presetId)));
         } else {
-            newTodo.setCustomTodoContent(new CustomTodoContent(newTodo, category));
+            newTodo.setCustomTodoContent(new CustomTodoContent(newTodo, category, "custom"));
         }
 
         return tripMapper.mapToTodoDTO(todoRepository.save(newTodo));
@@ -96,8 +99,14 @@ public class TripService {
      * Change contents or orderKey of todo.
      */
     public TodoDTO patchTodo(Long todoId, TodoDTO newTodoDTO) {
-        Todo todo = tripMapper.mapToTodo(tripMapper.updateTodoDTOFromDto(newTodoDTO, tripMapper.mapToTodoDTO(
-                todoRepository.findById(todoId).orElseThrow(() -> new NotFoundException(todoId)))));
+        Todo todo = todoRepository.findById(todoId).orElseThrow(() -> new NotFoundException(todoId));
+        if (todo.getCustomTodoContent() != null) {
+            CustomTodoContent customTodoContent = tripMapper.updateCustomTodoContentFromDto(newTodoDTO,
+                    todo.getCustomTodoContent());
+            customTodoContentRepository.save(customTodoContent);
+        }
+        todo = tripMapper.updateTodoFromDto(newTodoDTO, todo);
+
         return tripMapper.mapToTodoDTO(todoRepository.save(todo));
     }
 
@@ -105,8 +114,8 @@ public class TripService {
      * Create new todo.
      */
     public void deleteTodo(Long todoId) {
-        accomodationRepository.findById(todoId).orElseThrow(() -> new NotFoundException(todoId));
-        todoRepository.deleteById(todoId);
+        todoRepository.findById(todoId).ifPresentOrElse(entity -> todoRepository.delete(entity),
+                () -> new NotFoundException(todoId));
     }
 
     /**
@@ -131,8 +140,8 @@ public class TripService {
      * Create new todo.
      */
     public void deleteDestination(Long destinationId) {
-        accomodationRepository.findById(destinationId).orElseThrow(() -> new NotFoundException(destinationId));
-        destinationRepository.deleteById(destinationId);
+        destinationRepository.findById(destinationId).ifPresentOrElse(entity -> destinationRepository.delete(entity),
+                () -> new NotFoundException(destinationId));
     }
 
     /**
@@ -171,8 +180,8 @@ public class TripService {
      * Create new todo.
      */
     public void deleteAccomodation(Long accomodationId) {
-        accomodationRepository.findById(accomodationId).orElseThrow(() -> new NotFoundException(accomodationId));
-        accomodationRepository.deleteById(accomodationId);
+        accomodationRepository.findById(accomodationId).ifPresentOrElse(entity -> accomodationRepository.delete(entity),
+                () -> new NotFoundException(accomodationId));
     }
     /**
      * Create new empty custom todo.

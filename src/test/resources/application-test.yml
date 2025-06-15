@@ -9,3 +9,5 @@ spring:
         database: postgresql
         hibernate:
             ddl-auto: create-drop
+cors:
+    client-url: http://localhost:8081
