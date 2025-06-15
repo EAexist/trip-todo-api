@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -20,6 +21,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.matchalab.trip_todo_api.config.TestConfig;
 import com.matchalab.trip_todo_api.model.Accomodation;
 import com.matchalab.trip_todo_api.model.CustomTodoContent;
@@ -30,6 +32,9 @@ import com.matchalab.trip_todo_api.model.Trip;
 import com.matchalab.trip_todo_api.model.DTO.TodoDTO;
 import com.matchalab.trip_todo_api.model.DTO.TripDTO;
 import com.matchalab.trip_todo_api.repository.PresetTodoContentRepository;
+
+import lombok.extern.slf4j.Slf4j;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
@@ -38,7 +43,11 @@ import static org.assertj.core.api.Assertions.assertThat;
         TripMapperImpl.class
 })
 @TestInstance(Lifecycle.PER_CLASS)
+@Slf4j
 public class TripMapperTest {
+
+    @Autowired
+    private CustomTodoContent customTodoContent;
 
     @Autowired
     private TodoDTO customTodoDTO;
@@ -53,9 +62,9 @@ public class TripMapperTest {
     private Trip trip;
 
     @Autowired
-    private List<Accomodation> accomodations;
+    private Accomodation[] accomodations;
     @Autowired
-    private List<Destination> destinations;
+    private Destination[] destinations;
     /*
      * https://velog.io/@gwichanlee/MapStruct-Test-Code-%EC%9E%91%EC%84%B1
      * https://www.baeldung.com/mapstruct
@@ -69,14 +78,13 @@ public class TripMapperTest {
 
     @BeforeEach
     public void setUp() throws Exception {
-        CustomTodoContent customTodoContent = new CustomTodoContent(customTodo, 0L, "foreign", "currency", "환전", "💱");
         customTodo.setCustomTodoContent(customTodoContent);
 
-        accomodations.forEach(a -> a.setTrip(trip));
-        trip.setAccomodation(accomodations);
+        // Arrays.stream(accomodations).forEach(a -> a.setTrip(trip));
+        trip.setAccomodation(Arrays.asList(accomodations));
 
-        destinations.forEach(a -> a.setTrip(trip));
-        trip.setDestination(destinations);
+        // Arrays.stream(destinations).forEach(a -> a.setTrip(trip));
+        trip.setDestination(Arrays.asList(destinations));
     }
 
     @Test
@@ -85,8 +93,8 @@ public class TripMapperTest {
         Todo mappedTodo = tripMapper.mapToTodo(customTodoDTO);
         assertNotNull(customTodoDTO);
         assertNotNull(mappedTodo);
-        assertThat(customTodo).usingRecursiveComparison()
-                .ignoringFields("customTodoContent.todo").isEqualTo(mappedTodo);
+        assertThat(mappedTodo).usingRecursiveComparison()
+                .ignoringFieldsOfTypes().ignoringFields().isEqualTo(customTodo);
 
         // TodoContent todoContent = customTodo.getPresetTodoContent() != null ?
         // customTodo.getPresetTodoContent()
@@ -102,7 +110,7 @@ public class TripMapperTest {
         TodoDTO mappedTodoDTO = tripMapper.mapToTodoDTO(customTodo);
         assertNotNull(customTodo);
         assertNotNull(mappedTodoDTO);
-        assertThat(customTodoDTO).usingRecursiveComparison().isEqualTo(mappedTodoDTO);
+        assertThat(mappedTodoDTO).usingRecursiveComparison().isEqualTo(customTodoDTO);
     }
 
     @Test
@@ -116,8 +124,17 @@ public class TripMapperTest {
     @Test
     void mapToTripDTO_Given_trip_When_mapped_Then_correctTripDTO() {
         TripDTO mappedTripDTO = tripMapper.mapToTripDTO(trip);
-        assertThat(tripDTO).usingRecursiveComparison()
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            log.info(String.format("[TripMapperTest] tripDTO=%s\n, trip=%s\\n" + //
+                    ", mappedTripDTO=%s ",
+                    mapper.writeValueAsString(tripDTO),
+                    mapper.writeValueAsString(trip),
+                    mapper.writeValueAsString(mappedTripDTO)));
+        } catch (Exception e) {
+        }
+        assertThat(mappedTripDTO).usingRecursiveComparison()
                 .ignoringFieldsOfTypes().ignoringFields()
-                .isEqualTo(mappedTripDTO);
+                .isEqualTo(tripDTO);
     }
 }
