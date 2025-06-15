@@ -1,1 +1,1 @@
-web: java -jar target/trip-todo-api-0.0.1-SNAPSHOT.jar
+web: java -jar build/libs/trip-todo-api-0.0.1-SNAPSHOT.jar
