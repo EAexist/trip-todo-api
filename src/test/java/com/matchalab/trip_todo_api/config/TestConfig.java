@@ -141,14 +141,14 @@ public class TestConfig {
                 .type("currency")
                 .title("환전")
                 .iconId("💱")
-                .completeDateISOString("2025-02-25T00:00:00.001Z").presetId(1L).build();
+                .completeDateISOString(null).presetId(1L).build();
     }
 
     @Bean
     Todo presetTodo() {
         Todo todo = new Todo(null,
                 "환전은 미리미리 할 것",
-                "2025-02-25T00:00:00.001Z",
+                null,
                 0,
                 null,
                 null,

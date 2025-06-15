@@ -12,6 +12,7 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.matchalab.trip_todo_api.exception.PresetTodoContentNotFoundException;
 import com.matchalab.trip_todo_api.model.Accomodation;
 import com.matchalab.trip_todo_api.model.CustomTodoContent;
@@ -30,8 +31,7 @@ import com.matchalab.trip_todo_api.repository.PresetTodoContentRepository;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-// @Mapper(componentModel = "spring", unmappedTargetPolicy =
-// ReportingPolicy.IGNORE)
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public abstract class TripMapper {
 
     @Autowired
@@ -68,6 +68,7 @@ public abstract class TripMapper {
 
     @Named("mapCustomTodoContent")
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "id", ignore = true)
     public abstract CustomTodoContent updateCustomTodoContentFromDto(TodoDTO todoDTO,
             @MappingTarget CustomTodoContent customTodoContent);
 
@@ -107,6 +108,7 @@ public abstract class TripMapper {
 
     @Named("mapTodolist")
     public List<Todo> mapTodolist(TripDTO tripDTO, Trip trip) {
+        // log.info(String.format("[mapTodolist] trip=%s", asJsonString(trip)));
         return (tripDTO.todolist() != null) ? tripDTO.todolist().stream().map(this::mapToTodo).toList()
                 : trip.getTodolist();
     }
@@ -126,6 +128,7 @@ public abstract class TripMapper {
 
     @Named("mapAccomodation")
     public List<Accomodation> mapAccomodation(TripDTO tripDTO, Trip trip) {
+        // log.info(String.format("[mapAccomodation] trip=%s", asJsonString(trip)));
         return (tripDTO.accomodation() != null) ? tripDTO.accomodation().stream().map(this::mapToAccomodation).toList()
                 : trip.getAccomodation();
     }
@@ -144,6 +147,7 @@ public abstract class TripMapper {
 
     @Named("mapDestination")
     public List<Destination> mapDestination(TripDTO tripDTO, Trip trip) {
+        // log.info(String.format("[mapDestination] trip=%s", asJsonString(trip)));
         return (tripDTO.destination() != null) ? tripDTO.destination().stream().map(this::mapToDestination).toList()
                 : trip.getDestination();
     }
@@ -168,7 +172,7 @@ public abstract class TripMapper {
             accomodation.setTitle("HelloWorld");
             return accomodation;
         }).toList();
-        log.info("accomodations", accomodations);
+        // log.info("accomodations", accomodations);
         trip.setAccomodation(accomodations);
     }
 
@@ -182,20 +186,37 @@ public abstract class TripMapper {
 
     public abstract PresetTodoContentDTO mapToPresetTodoContentDTO(PresetTodoContent presetTodoContent);
 
-    @Mapping(target = "destination", expression = "java(mapDestination(tripDTO, trip))")
-    @Mapping(target = "accomodation", expression = "java(mapAccomodation(tripDTO, trip))")
-    @Mapping(target = "todolist", expression = "java(mapTodolist(tripDTO, trip))")
+    // @Mapping(target = "destination", expression = "java(mapDestination(tripDTO,
+    // trip))")
+    // @Mapping(target = "accomodation", expression = "java(mapAccomodation(tripDTO,
+    // trip))")
+    // @Mapping(target = "todolist", expression = "java(mapTodolist(tripDTO,
+    // trip))")
+    @Mapping(target = "destination", ignore = true)
+    @Mapping(target = "accomodation", ignore = true)
+    @Mapping(target = "todolist", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     public abstract Trip updateTripFromDto(TripDTO tripDTO, @MappingTarget Trip trip);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     public abstract TodoDTO updateTodoDTOFromDto(TodoDTO todoDTOSource, @MappingTarget TodoDTO todoDTOTarget);
 
-    @Mapping(target = "customTodoContent", expression = "java(updateCustomTodoContentFromDto(todoDTO, todo.getCustomTodoContent()))")
+    // @Mapping(target = "customTodoContent", expression =
+    // "java(updateCustomTodoContentFromDto(todoDTO, todo.getCustomTodoContent()))")
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     public abstract Todo updateTodoFromDto(TodoDTO todoDTO, @MappingTarget Todo todo);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     public abstract Accomodation updateAccomodationFromDto(AccomodationDTO accomodationDTO,
             @MappingTarget Accomodation accomodation);
+
+    // protected static String asJsonString(final Object obj) {
+    // try {
+    // final ObjectMapper mapper = new ObjectMapper();
+    // final String jsonContent = mapper.writeValueAsString(obj);
+    // return jsonContent;
+    // } catch (Exception e) {
+    // throw new RuntimeException(e);
+    // }
+    // }
 }

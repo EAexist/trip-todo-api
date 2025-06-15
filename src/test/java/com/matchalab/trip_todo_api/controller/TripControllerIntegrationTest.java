@@ -1,18 +1,15 @@
 package com.matchalab.trip_todo_api.controller;
 
-import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -35,37 +32,31 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.matchalab.trip_todo_api.DataLoader;
 import com.matchalab.trip_todo_api.config.TestConfig;
-import com.matchalab.trip_todo_api.config.TestSecurityConfig;
 import com.matchalab.trip_todo_api.exception.NotFoundException;
 import com.matchalab.trip_todo_api.exception.PresetTodoContentNotFoundException;
 import com.matchalab.trip_todo_api.model.Accomodation;
 import com.matchalab.trip_todo_api.model.CustomTodoContent;
-import com.matchalab.trip_todo_api.model.request.CreateTodoRequest;
 import com.matchalab.trip_todo_api.model.Destination;
 import com.matchalab.trip_todo_api.model.PresetTodoContent;
 import com.matchalab.trip_todo_api.model.Todo;
 import com.matchalab.trip_todo_api.model.TodoContent;
 import com.matchalab.trip_todo_api.model.Trip;
-import com.matchalab.trip_todo_api.model.DTO.AccomodationDTO;
 import com.matchalab.trip_todo_api.model.DTO.PresetTodoContentDTO;
 import com.matchalab.trip_todo_api.model.DTO.TodoDTO;
 import com.matchalab.trip_todo_api.model.DTO.TripDTO;
 import com.matchalab.trip_todo_api.model.mapper.TripMapper;
-import com.matchalab.trip_todo_api.repository.AccomodationRepository;
-import com.matchalab.trip_todo_api.repository.CustomTodoContentRepository;
-import com.matchalab.trip_todo_api.repository.DestinationRepository;
+import com.matchalab.trip_todo_api.model.request.CreateTodoRequest;
 import com.matchalab.trip_todo_api.repository.PresetTodoContentRepository;
 import com.matchalab.trip_todo_api.repository.TodoRepository;
 import com.matchalab.trip_todo_api.repository.TripRepository;
 
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @AutoConfigureMockMvc
 @WithMockUser
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Import({ TestConfig.class, TestSecurityConfig.class })
+@Import({ TestConfig.class })
 // @TestPropertySource(properties = { "spring.config.location =
 // classpath:application-test.yml" })
 @TestInstance(Lifecycle.PER_CLASS)
@@ -302,14 +293,14 @@ public class TripControllerIntegrationTest {
     }
 
     @Test
-    void patchTodo_Given_NewContentAndOrderKey_When_RequestPatch_Then_UpdateTodo() throws Exception {
+    void patchTodo_Given_NewContentAndOrderKey_When_RequestPatchCustomTodo_Then_UpdateTodo() throws Exception {
 
         Long id = savedTrip.getId();
 
         Todo todo = savedTrip.getTodolist().stream().filter(todo_ -> todo_.getPresetTodoContent() == null).toList()
                 .getFirst();
 
-        TodoDTO todoDTOToPatch = new TodoDTO(null, 9, "새로운 노트", null, null, "reservation", null,
+        TodoDTO todoDTOToPatch = new TodoDTO(null, 9, "새로운 노트", null, null, "goods", null,
                 "새로운 할 일 이름", "🎁");
 
         ResultActions result = mockMvc.perform(patch(String.format("/trip/%s/todo/%s", id, todo.getId()))
@@ -318,16 +309,50 @@ public class TripControllerIntegrationTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        // .andExpect(jsonPath("title").value(todoDTOToPatch.title()))
-        // .andExpect(jsonPath("note").value(todoDTOToPatch.note()))
-        // .andExpect(jsonPath("iconId").value(todoDTOToPatch.iconId()))
-        ;
+                .andExpect(jsonPath("title").value(todoDTOToPatch.title()))
+                .andExpect(jsonPath("orderKey").value(todoDTOToPatch.orderKey()))
+                .andExpect(jsonPath("note").value(todoDTOToPatch.note()))
+                .andExpect(jsonPath("iconId").value(todoDTOToPatch.iconId()));
 
         TodoDTO actualTodoDTO = asObject(result, TodoDTO.class);
         assertThat(actualTodoDTO).usingRecursiveComparison()
                 .ignoringFieldsOfTypes()
-                // .ignoringFields("title", "note", "iconId")
+                .ignoringFields("title", "note", "iconId", "orderKey")
                 .isEqualTo(tripMapper.mapToTodoDTO(todo));
+
+        assertThat(todoRepository.findById(actualTodoDTO.id()).get().getCustomTodoContent().getId()).isEqualTo(
+                todo.getCustomTodoContent().getId());
+    }
+
+    @Test
+    void patchTodo_Given_NewContentAndOrderKey_When_RequestPatchPresetTodo_Then_UpdateTodo() throws Exception {
+
+        Long id = savedTrip.getId();
+
+        Todo todo = savedTrip.getTodolist().stream().filter(todo_ -> todo_.getPresetTodoContent() != null).toList()
+                .getFirst();
+
+        TodoDTO todoDTOToPatch = new TodoDTO(null, 9, "새로운 노트", "2025-02-20T00:00:00.001Z", null, null, null,
+                "새로운 할 일 이름", "🎁");
+
+        ResultActions result = mockMvc.perform(patch(String.format("/trip/%s/todo/%s", id, todo.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(asJsonString(todoDTOToPatch)))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("note").value(todoDTOToPatch.note()))
+                .andExpect(jsonPath("orderKey").value(todoDTOToPatch.orderKey()))
+                .andExpect(jsonPath("completeDateISOString").value(todoDTOToPatch.completeDateISOString()));
+
+        TodoDTO actualTodoDTO = asObject(result, TodoDTO.class);
+        assertThat(actualTodoDTO).usingRecursiveComparison()
+                .ignoringFieldsOfTypes()
+                .ignoringFields("note", "orderKey", "completeDateISOString")
+                .isEqualTo(tripMapper.mapToTodoDTO(todo));
+
+        assertThat(todoRepository.findById(actualTodoDTO.id()).get().getPresetTodoContent().getId()).isEqualTo(
+                todo.getPresetTodoContent().getId());
     }
 
     /* @TODO */
