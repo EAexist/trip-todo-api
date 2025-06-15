@@ -24,9 +24,9 @@ public class CustomTodoContent extends TodoContent {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "todo_id", referencedColumnName = "id")
-    private Todo todo;
+    // @OneToOne
+    // @JoinColumn(name = "todo_id", referencedColumnName = "id")
+    // private Todo todo;
 
     public CustomTodoContent(Todo todo, Long id,
             String category,
@@ -34,11 +34,16 @@ public class CustomTodoContent extends TodoContent {
             String title,
             String iconId) {
         super(category, type, title, iconId);
-        this.todo = todo;
+        this.id = id;
     }
 
-    public CustomTodoContent(Todo todo, String category) {
-        super(category);
-        this.todo = todo;
+    public CustomTodoContent(Todo todo, String category, String type) {
+        super(category, type);
+        // this.todo = todo;
+    }
+
+    public CustomTodoContent(CustomTodoContent customTodoContent) {
+        super(customTodoContent.getCategory(), customTodoContent.getType(),
+                customTodoContent.getTitle(), customTodoContent.getIconId());
     }
 }

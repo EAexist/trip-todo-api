@@ -1,6 +1,6 @@
 package com.matchalab.trip_todo_api.model.request;
 
-import io.micrometer.common.lang.Nullable;
+import jakarta.annotation.Nullable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

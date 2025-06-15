@@ -5,19 +5,25 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.matchalab.trip_todo_api.exception.NotFoundException;
 import com.matchalab.trip_todo_api.exception.PresetTodoContentNotFoundException;
 import com.matchalab.trip_todo_api.exception.TripNotFoundException;
 import com.matchalab.trip_todo_api.model.Accomodation;
 import com.matchalab.trip_todo_api.model.CustomTodoContent;
+import com.matchalab.trip_todo_api.model.Destination;
 import com.matchalab.trip_todo_api.model.PresetTodoContent;
 import com.matchalab.trip_todo_api.model.Todo;
 import com.matchalab.trip_todo_api.model.Trip;
 import com.matchalab.trip_todo_api.model.DTO.AccomodationDTO;
+import com.matchalab.trip_todo_api.model.DTO.DestinationDTO;
+import com.matchalab.trip_todo_api.model.DTO.PresetTodoContentDTO;
 import com.matchalab.trip_todo_api.model.DTO.TodoDTO;
 import com.matchalab.trip_todo_api.model.DTO.TripDTO;
 import com.matchalab.trip_todo_api.model.mapper.TripMapper;
 import com.matchalab.trip_todo_api.repository.AccomodationRepository;
+import com.matchalab.trip_todo_api.repository.CustomTodoContentRepository;
+import com.matchalab.trip_todo_api.repository.DestinationRepository;
 import com.matchalab.trip_todo_api.repository.PresetTodoContentRepository;
 import com.matchalab.trip_todo_api.repository.TodoRepository;
 import com.matchalab.trip_todo_api.repository.TripRepository;
@@ -36,6 +42,10 @@ public class TripService {
     private final TodoRepository todoRepository;
     @Autowired
     private final PresetTodoContentRepository presetTodoContentRepository;
+    @Autowired
+    private final CustomTodoContentRepository customTodoContentRepository;
+    @Autowired
+    private final DestinationRepository destinationRepository;
     @Autowired
     private final AccomodationRepository accomodationRepository;
     @Autowired
@@ -60,9 +70,9 @@ public class TripService {
     /**
      * Update the content of a Trip.
      */
-    public TripDTO putTrip(Long tripId, TripDTO newTripDTO) {
-        Trip trip = tripMapper.mapToTrip(newTripDTO);
-        trip.setId(tripId);
+    public TripDTO patchTrip(Long tripId, TripDTO newTripDTO) {
+        Trip trip = tripMapper.updateTripFromDto(newTripDTO,
+                tripRepository.findById(tripId).orElseThrow(() -> new TripNotFoundException(tripId)));
         return tripMapper.mapToTripDTO(tripRepository.save(trip));
     }
 
@@ -72,32 +82,66 @@ public class TripService {
     public TodoDTO createTodo(Long tripId, Long presetId, String category) {
         Todo newTodo = new Todo();
         Trip trip = tripRepository.findById(tripId).orElseThrow(() -> new TripNotFoundException(tripId));
-        newTodo.setOrder_key(0);
+        newTodo.setOrderKey(0);
         newTodo.setTrip(trip);
 
         if (presetId != null) {
             newTodo.setPresetTodoContent(presetTodoContentRepository.findById(presetId)
                     .orElseThrow(() -> new PresetTodoContentNotFoundException(presetId)));
         } else {
-            newTodo.setCustomTodoContent(new CustomTodoContent(newTodo, category));
+            newTodo.setCustomTodoContent(new CustomTodoContent(newTodo, category, "custom"));
         }
 
         return tripMapper.mapToTodoDTO(todoRepository.save(newTodo));
     }
 
     /**
-     * Create new todo.
+     * Change contents or orderKey of todo.
      */
-    public void deleteTodo(Long todoId) {
-        accomodationRepository.findById(todoId).orElseThrow(() -> new NotFoundException(todoId));
-        todoRepository.deleteById(todoId);
+    public TodoDTO patchTodo(Long todoId, TodoDTO newTodoDTO) {
+        Todo todo = todoRepository.findById(todoId).orElseThrow(() -> new NotFoundException(todoId));
+        if (todo.getCustomTodoContent() != null) {
+            CustomTodoContent customTodoContent = tripMapper.updateCustomTodoContentFromDto(newTodoDTO,
+                    todo.getCustomTodoContent());
+            customTodoContentRepository.save(customTodoContent);
+        }
+        todo = tripMapper.updateTodoFromDto(newTodoDTO, todo);
+
+        return tripMapper.mapToTodoDTO(todoRepository.save(todo));
     }
 
     /**
      * Create new todo.
      */
-    public List<PresetTodoContent> getTodoPreset(Long tripId) {
-        return presetTodoContentRepository.findAll();
+    public void deleteTodo(Long todoId) {
+        todoRepository.findById(todoId).ifPresentOrElse(entity -> todoRepository.delete(entity),
+                () -> new NotFoundException(todoId));
+    }
+
+    /**
+     * Create new todo.
+     */
+    public List<PresetTodoContentDTO> getTodoPreset(Long tripId) {
+        return presetTodoContentRepository.findAll().stream().map(tripMapper::mapToPresetTodoContentDTO).toList();
+    }
+
+    /**
+     * Create new empty trip.
+     */
+    public DestinationDTO createDestination(Long tripId) {
+        Trip trip = tripRepository.findById(tripId).orElseThrow(() -> new TripNotFoundException(tripId));
+        Destination newDestination = new Destination();
+        newDestination.setTrip(trip);
+        trip.getDestination().add(newDestination);
+        return tripMapper.mapToDestinationDTO(tripRepository.save(trip).getDestination().getLast());
+    }
+
+    /**
+     * Create new todo.
+     */
+    public void deleteDestination(Long destinationId) {
+        destinationRepository.findById(destinationId).ifPresentOrElse(entity -> destinationRepository.delete(entity),
+                () -> new NotFoundException(destinationId));
     }
 
     /**
@@ -115,19 +159,29 @@ public class TripService {
      */
     public AccomodationDTO createAccomodation(Long tripId) {
         Trip trip = tripRepository.findById(tripId).orElseThrow(() -> new TripNotFoundException(tripId));
-        log.info(String.format("[createAccomodation] tripaccomodation:{}", trip));
         Accomodation newAccomodation = new Accomodation();
         newAccomodation.setTrip(trip);
-        AccomodationDTO accomodation = tripMapper.mapToAccomodationDTO(accomodationRepository.save(newAccomodation));
-        return accomodation;
+        trip.getAccomodation().add(newAccomodation);
+        return tripMapper.mapToAccomodationDTO(tripRepository.save(trip).getAccomodation().getLast());
+    }
+
+    /**
+     * Change contents of accomodation.
+     */
+    public AccomodationDTO patchAccomodation(Long accomodationId, AccomodationDTO newAccomodationDTO) {
+        Accomodation accomodation = tripMapper.updateAccomodationFromDto(newAccomodationDTO,
+                accomodationRepository.findById(accomodationId)
+                        .orElseThrow(() -> new NotFoundException(accomodationId)));
+
+        return tripMapper.mapToAccomodationDTO(accomodationRepository.save(accomodation));
     }
 
     /**
      * Create new todo.
      */
     public void deleteAccomodation(Long accomodationId) {
-        accomodationRepository.findById(accomodationId).orElseThrow(() -> new NotFoundException(accomodationId));
-        accomodationRepository.deleteById(accomodationId);
+        accomodationRepository.findById(accomodationId).ifPresentOrElse(entity -> accomodationRepository.delete(entity),
+                () -> new NotFoundException(accomodationId));
     }
     /**
      * Create new empty custom todo.
@@ -136,7 +190,7 @@ public class TripService {
     // Todo newTodo = new Todo();
     // Trip trip = tripRepository.findById(tripId).orElseThrow(() -> new
     // TripNotFoundException(tripId));
-    // newTodo.setOrder_key(0);
+    // newTodo.setOrderKey(0);
     // newTodo.setTrip(trip);
     // newTodo.setCustomTodoContent(new CustomTodoContent(newTodo, category));
     // return tripMapper.mapToTodoDTO(todoRepository.save(newTodo));
@@ -150,7 +204,7 @@ public class TripService {
     // Todo newTodo = new Todo();
     // Trip trip = tripRepository.findById(tripId).orElseThrow(() -> new
     // TripNotFoundException(tripId));
-    // newTodo.setOrder_key(0);
+    // newTodo.setOrderKey(0);
     // newTodo.setTrip(trip);
     // newTodo.setPresetTodoContent(presetTodoContentRepository.findById(presetId)
     // .orElseThrow(() -> new PresetTodoContentNotFoundException(presetId)));

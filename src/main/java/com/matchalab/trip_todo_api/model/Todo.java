@@ -12,11 +12,13 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Getter
 @Setter
+@RequiredArgsConstructor
 @AllArgsConstructor
 public class Todo {
 
@@ -26,14 +28,13 @@ public class Todo {
 
     private String note;
     private String completeDateISOString;
-    private int order_key;
+    private int orderKey;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "trip_id")
     private Trip trip;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "customTodoContent_id", referencedColumnName = "id")
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Nullable
     private CustomTodoContent customTodoContent;
 
@@ -42,6 +43,11 @@ public class Todo {
     @Nullable
     private PresetTodoContent presetTodoContent;
 
-    public Todo() {
+    public Todo(Todo todo) {
+        this.note = todo.getNote();
+        this.completeDateISOString = todo.getCompleteDateISOString();
+        this.orderKey = todo.getOrderKey();
+        this.customTodoContent = todo.getCustomTodoContent();
+        this.presetTodoContent = todo.getPresetTodoContent();
     }
 }
