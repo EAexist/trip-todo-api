@@ -93,8 +93,8 @@ public class TripMapperTest {
         Todo mappedTodo = tripMapper.mapToTodo(customTodoDTO);
         assertNotNull(customTodoDTO);
         assertNotNull(mappedTodo);
-        assertThat(customTodo).usingRecursiveComparison()
-                .ignoringFields("customTodoContent.todo").isEqualTo(mappedTodo);
+        assertThat(mappedTodo).usingRecursiveComparison()
+                .ignoringFieldsOfTypes().ignoringFields().isEqualTo(customTodo);
 
         // TodoContent todoContent = customTodo.getPresetTodoContent() != null ?
         // customTodo.getPresetTodoContent()
@@ -110,7 +110,7 @@ public class TripMapperTest {
         TodoDTO mappedTodoDTO = tripMapper.mapToTodoDTO(customTodo);
         assertNotNull(customTodo);
         assertNotNull(mappedTodoDTO);
-        assertThat(customTodoDTO).usingRecursiveComparison().isEqualTo(mappedTodoDTO);
+        assertThat(mappedTodoDTO).usingRecursiveComparison().isEqualTo(customTodoDTO);
     }
 
     @Test
@@ -124,15 +124,17 @@ public class TripMapperTest {
     @Test
     void mapToTripDTO_Given_trip_When_mapped_Then_correctTripDTO() {
         TripDTO mappedTripDTO = tripMapper.mapToTripDTO(trip);
-        ObjectMapper mapper = new ObjectMapper();
-        // try {
-        // log.info(String.format("mappedTripDTO : %s",
-        // mapper.writeValueAsString(mappedTripDTO)));
-        // log.info(String.format("tripDTO : %s", mapper.writeValueAsString(tripDTO)));
-        // } catch (Exception e) {
-        // }
-        assertThat(tripDTO).usingRecursiveComparison()
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            log.info(String.format("[TripMapperTest] tripDTO=%s\n, trip=%s\\n" + //
+                    ", mappedTripDTO=%s ",
+                    mapper.writeValueAsString(tripDTO),
+                    mapper.writeValueAsString(trip),
+                    mapper.writeValueAsString(mappedTripDTO)));
+        } catch (Exception e) {
+        }
+        assertThat(mappedTripDTO).usingRecursiveComparison()
                 .ignoringFieldsOfTypes().ignoringFields()
-                .isEqualTo(mappedTripDTO);
+                .isEqualTo(tripDTO);
     }
 }

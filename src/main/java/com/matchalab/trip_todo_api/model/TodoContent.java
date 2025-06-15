@@ -21,7 +21,8 @@ public class TodoContent {
     private String title;
     private String iconId;
 
-    public TodoContent(String category) {
+    public TodoContent(String category, String type) {
         this.category = category;
+        this.type = type;
     }
 }
