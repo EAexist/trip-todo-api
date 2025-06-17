@@ -1,4 +1,6 @@
+_.elasticbeanstalk/
+_build/
+.gradle/
 .vscode/
 pgdata/
-_build/
 Buildfile

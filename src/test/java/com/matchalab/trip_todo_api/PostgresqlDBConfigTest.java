@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -37,17 +38,25 @@ public class PostgresqlDBConfigTest {
     @Value("${spring.datasource.password}")
     private String password;
 
+    private Properties props = new Properties();
+
     @BeforeAll
     void setUp() {
-        log.info("[PostgresqlDbConfigTest] Trying to connect DB:");
+        log.info("Trying to connect DB:");
         log.info("url={}", url);
         log.info("username={}", username);
         log.info("password={}", password);
+
+        Properties props = new Properties();
+        props.put("username", username);
+        props.put("password", password);
+        props.put("sslmode", "verify-ca");
+        props.put("ssl", "true");
     }
 
     @Test
     void DBConnectionTest() throws SQLException {
-        Connection conn = DriverManager.getConnection(url, username, password);
+        Connection conn = DriverManager.getConnection(url, props);
         log.info("연결 정보 확인: {}", conn);
         assertNotNull(conn);
     }
