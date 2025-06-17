@@ -1,10 +1,15 @@
 package com.matchalab.trip_todo_api;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -34,11 +39,28 @@ public class DataLoader implements CommandLineRunner {
     // @Autowired
     // private DestinationRepository destinationRepository;
 
+    @Value("${spring.datasource.url}")
+    private String url;
+
+    @Value("${spring.datasource.username}")
+    private String username;
+
+    @Value("${spring.datasource.password}")
+    private String password;
+
     @Override
     @Transactional
     public void run(String... args) throws Exception {
 
+        // Properties props = new Properties();
+        // props.put("username", username);
+        // props.put("password", password);
+        // props.put("sslmode", "verify-ca");
+        // props.put("ssl", "true");
+
         try {
+            // Connection conn = DriverManager.getConnection(url, props);
+            // log.info("연결 정보 확인: {}", conn);
             presetTodoContentRepository.saveAll(readPresetJson());
 
         } catch (DataIntegrityViolationException ignore) {
