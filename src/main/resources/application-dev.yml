@@ -1,15 +1,23 @@
 spring:
     datasource:
         driver-class-name: org.postgresql.Driver
-        url: jdbc:postgresql://localhost:5432/trip_todo
-        username: matchalab_admin_test
-        password: hello_test
+        url: jdbc:postgresql://awseb-e-vrftrw9zbg-stack-awsebrdsdatabase-kkegot0jkkex.chs6kwmmakb1.ap-northeast-2.rds.amazonaws.com:5432/ebdb?ssl=true&sslmode=require&sslrootcert=classpath:certs/ap-northeast-2-root.crt
+        username: matchalab
+        password: hello_matcha        
+        # ssl: true
+        # sslfactory: org.postgresql.ssl.NonValidatingFactory
     jpa:
         show-sql: true
         database: postgresql
         hibernate:
-            ddl-auto: create-drop
+            ddl-auto: update
+    ssl:
+        bundle:
+            pem:
+                mybundle:
+                    truststore:
+                        certificate: classpath:certs/ap-northeast-2-root.crt
 cors:
     client-url: http://localhost:8081
 server:
-    port: 8080
+    port: 5000
