@@ -50,15 +50,21 @@ dependencies {
     testCompileOnly 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
 
+    /* DB */
     implementation 'org.postgresql:postgresql'
 
+    /* Mapstruct */
 	annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'   
     testAnnotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0' 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
+    /* Security */
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	testImplementation 'org.springframework.security:spring-security-test'
     
+    /* OAuth2.0 */
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+
     // testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testImplementation 'org.assertj:assertj-core:3.27.2'
