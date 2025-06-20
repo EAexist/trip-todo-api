@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.matchalab.trip_todo_api.exception.NotFoundException;
@@ -18,6 +20,7 @@ import com.matchalab.trip_todo_api.model.Trip;
 import com.matchalab.trip_todo_api.model.DTO.AccomodationDTO;
 import com.matchalab.trip_todo_api.model.DTO.DestinationDTO;
 import com.matchalab.trip_todo_api.model.DTO.PresetTodoContentDTO;
+import com.matchalab.trip_todo_api.model.DTO.ReservationDTO;
 import com.matchalab.trip_todo_api.model.DTO.TodoDTO;
 import com.matchalab.trip_todo_api.model.DTO.TripDTO;
 import com.matchalab.trip_todo_api.model.mapper.TripMapper;
@@ -36,6 +39,8 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class TripService {
 
+    private final VisionService visionService;
+
     @Autowired
     private final TripRepository tripRepository;
     @Autowired
@@ -50,6 +55,19 @@ public class TripService {
     private final AccomodationRepository accomodationRepository;
     @Autowired
     private final TripMapper tripMapper;
+
+    /**
+     * Create new empty trip.
+     */
+    public ReservationDTO uploadReservationImage(Long tripId,
+            List<MultipartFile> files) {
+        Trip trip = tripRepository.findById(tripId).orElseThrow(() -> new TripNotFoundException(tripId));
+        List<String> text = files.stream().map(file -> file.getResource()).map(visionService::extractTextfromImage)
+                .toList();
+        log.info(String.format("[extractTextfromImage] {}", text.toString()));
+        Accomodation accomodation = new Accomodation();
+        return new ReservationDTO(tripMapper.mapToAccomodationDTO(accomodation));
+    }
 
     /**
      * Provide the details of a Trip with the given id.
