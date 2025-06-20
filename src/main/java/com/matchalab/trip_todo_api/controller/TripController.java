@@ -27,6 +27,7 @@ import com.matchalab.trip_todo_api.model.DTO.TodoDTO;
 import com.matchalab.trip_todo_api.model.DTO.TripDTO;
 import com.matchalab.trip_todo_api.model.request.CreateTodoRequest;
 import com.matchalab.trip_todo_api.service.TripService;
+import com.matchalab.trip_todo_api.utils.Utils;
 
 import io.micrometer.common.lang.Nullable;
 import lombok.Getter;
@@ -60,7 +61,7 @@ public class TripController {
     public ResponseEntity<TripDTO> createTrip() {
         try {
             TripDTO tripDTO = TripService.createTrip();
-            return ResponseEntity.created(getLocation(tripDTO.id())).body(tripDTO);
+            return ResponseEntity.created(Utils.getLocation(tripDTO.id())).body(tripDTO);
         } catch (HttpClientErrorException e) {
             throw e;
         }
@@ -85,7 +86,7 @@ public class TripController {
     public ResponseEntity<TodoDTO> createTodo(@PathVariable Long tripId, @RequestBody CreateTodoRequest requestbody) {
         try {
             TodoDTO todoDTO = TripService.createTodo(tripId, requestbody.getPresetId(), requestbody.getCategory());
-            return ResponseEntity.created(getLocation(todoDTO.id())).body(todoDTO);
+            return ResponseEntity.created(Utils.getLocation(todoDTO.id())).body(todoDTO);
         } catch (HttpClientErrorException e) {
             throw e;
         }
@@ -137,7 +138,7 @@ public class TripController {
     public ResponseEntity<DestinationDTO> createDestination(@PathVariable Long tripId) {
         try {
             DestinationDTO destinationDTO = TripService.createDestination(tripId);
-            return ResponseEntity.created(getLocation(destinationDTO.id())).body(destinationDTO);
+            return ResponseEntity.created(Utils.getLocation(destinationDTO.id())).body(destinationDTO);
         } catch (HttpClientErrorException e) {
             throw e;
         }
@@ -173,7 +174,7 @@ public class TripController {
     public ResponseEntity<AccomodationDTO> createAccomodation(@PathVariable Long tripId) {
         try {
             AccomodationDTO accomodationDTO = TripService.createAccomodation(tripId);
-            return ResponseEntity.created(getLocation(accomodationDTO.id())).body(accomodationDTO);
+            return ResponseEntity.created(Utils.getLocation(accomodationDTO.id())).body(accomodationDTO);
         } catch (HttpClientErrorException e) {
             throw e;
         }
@@ -203,11 +204,6 @@ public class TripController {
         }
     }
 
-    private URI getLocation(Object resourceId) {
-        return ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{childId}").buildAndExpand(resourceId)
-                .toUri();
-    }
-
     /**
      * Provide the details of an Trip with the given id.
      */
@@ -216,7 +212,7 @@ public class TripController {
     // @RequestBody String category) {
     // try {
     // TodoDTO todoDTO = TripService.createCustomTodo(tripId, category);
-    // return ResponseEntity.created(getLocation(todoDTO.id())).body(todoDTO);
+    // return ResponseEntity.created(Utils.getLocation(todoDTO.id())).body(todoDTO);
     // } catch (HttpClientErrorException e) {
     // throw e;
     // }
@@ -231,7 +227,8 @@ public class TripController {
     // @RequestBody List<Long> presetIds) {
     // try {
     // List<TodoDTO> todoDTOs = TripService.createPresetTodo(tripId, presetIds);
-    // return ResponseEntity.status(HttpStatus.SEE_OTHER).location(getLocation(new
+    // return
+    // ResponseEntity.status(HttpStatus.SEE_OTHER).location(Utils.getLocation(new
     // Object())).body(todoDTOs);
     // } catch (HttpClientErrorException e) {
     // throw e;
