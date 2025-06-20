@@ -31,10 +31,8 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        /*
-         * https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-
-         * server/multitenancy.html#_resolving_the_tenant_by_claim
-         */
+        // https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-server/multitenancy.html#_resolving_the_tenant_by_claim
+
         JwtIssuerAuthenticationManagerResolver authenticationManagerResolver = JwtIssuerAuthenticationManagerResolver
                 .fromTrustedIssuers(kakaoIssuerUri, googleIssuerUri);
 
