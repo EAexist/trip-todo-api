@@ -10,6 +10,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -21,12 +24,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.ModelAndView;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,6 +48,7 @@ import com.matchalab.trip_todo_api.model.PresetTodoContent;
 import com.matchalab.trip_todo_api.model.Todo;
 import com.matchalab.trip_todo_api.model.TodoContent;
 import com.matchalab.trip_todo_api.model.Trip;
+import com.matchalab.trip_todo_api.model.DTO.AccomodationDTO;
 import com.matchalab.trip_todo_api.model.DTO.PresetTodoContentDTO;
 import com.matchalab.trip_todo_api.model.DTO.TodoDTO;
 import com.matchalab.trip_todo_api.model.DTO.TripDTO;
@@ -60,7 +68,7 @@ import lombok.extern.slf4j.Slf4j;
 // @TestPropertySource(properties = { "spring.config.location =
 // classpath:application-test.yml" })
 @TestInstance(Lifecycle.PER_CLASS)
-@ActiveProfiles("test")
+// @ActiveProfiles("test")
 @EnableWebSecurity
 public class TripControllerIntegrationTest {
 
@@ -167,6 +175,31 @@ public class TripControllerIntegrationTest {
                 asJsonString(tripMapper
                         .mapToPresetTodoContentDTO(savedTrip.getTodolist().getFirst().getPresetTodoContent()))));
         log.info(String.format("[setUp] savedTrip=%s", asJsonString(tripMapper.mapToTripDTO(savedTrip))));
+    }
+
+    @Test
+    void testExtractTextFromImage() throws Exception {
+
+        Long id = savedTrip.getId();
+        File _file = new ClassPathResource("/image/accomodation-agoda-app-ios_1.png").getFile();
+        MultipartFile file = new MockMultipartFile(_file.getName(), new FileInputStream(_file));
+
+        ResultActions result = mockMvc
+                .perform(post(String.format("/trip/%s/reservation", id))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(new MultipartFile[] { file
+                        })))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+        // this.mockMvc
+        // .perform(get(TEXT_IMAGE_URL))
+        // .andDo(
+        // response -> {
+        // ModelAndView result = response.getModelAndView();
+        // String textFromImage = ((String) result.getModelMap().get("text")).trim();
+        // assertThat(textFromImage).isEqualTo("STOP");
+        // });
     }
 
     @Test
