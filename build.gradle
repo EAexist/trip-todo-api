@@ -72,13 +72,15 @@ dependencies {
     /* OAuth2.0 */
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
 
-    // testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    /* Google */    
+    implementation 'com.google.cloud:spring-cloud-gcp-starter-vision'
+    implementation 'org.springframework.ai:spring-ai-starter-model-vertex-ai-gemini'
+
+    /* Test */
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testImplementation 'org.assertj:assertj-core:3.27.2'
+    // testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     // testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
-
-    /* GCP */
-    implementation 'com.google.cloud:spring-cloud-gcp-starter-vision'
     
 }
 tasks.named('test') {
