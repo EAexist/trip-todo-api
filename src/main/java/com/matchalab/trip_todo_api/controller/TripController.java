@@ -13,8 +13,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.matchalab.trip_todo_api.model.Accomodation;
@@ -23,6 +25,7 @@ import com.matchalab.trip_todo_api.model.PresetTodoContent;
 import com.matchalab.trip_todo_api.model.DTO.AccomodationDTO;
 import com.matchalab.trip_todo_api.model.DTO.DestinationDTO;
 import com.matchalab.trip_todo_api.model.DTO.PresetTodoContentDTO;
+import com.matchalab.trip_todo_api.model.DTO.ReservationDTO;
 import com.matchalab.trip_todo_api.model.DTO.TodoDTO;
 import com.matchalab.trip_todo_api.model.DTO.TripDTO;
 import com.matchalab.trip_todo_api.model.request.CreateTodoRequest;
@@ -39,6 +42,20 @@ import lombok.RequiredArgsConstructor;
 public class TripController {
 
     private final TripService TripService;
+
+    /**
+     * Provide the details of a Trip with the given id.
+     */
+    @PostMapping("/{tripId}/reservation")
+    public ResponseEntity<ReservationDTO> uploadReservationImage(@PathVariable Long tripId,
+            @RequestParam("file") List<MultipartFile> files) {
+        try {
+            return ResponseEntity.ok().body(TripService.uploadReservationImage(tripId,
+                    files));
+        } catch (HttpClientErrorException e) {
+            throw e;
+        }
+    }
 
     /**
      * Provide the details of a Trip with the given id.
