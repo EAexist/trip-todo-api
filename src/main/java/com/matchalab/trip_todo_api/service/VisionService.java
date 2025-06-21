@@ -3,10 +3,10 @@ package com.matchalab.trip_todo_api.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.gcp.vision.CloudVisionTemplate;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
+
+import com.google.cloud.spring.vision.CloudVisionTemplate;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,8 +45,8 @@ public class VisionService {
     // return new Accomodation();
     // }
 
-    public String extractTextfromImage(Resource resource) {
-        String text = cloudVisionTemplate.extractTextFromImage(resource);
+    public List<String> extractTextfromImage(Resource resource) {
+        List<String> text = cloudVisionTemplate.extractTextFromFile(resource, "image/tiff");
         return text;
     }
 

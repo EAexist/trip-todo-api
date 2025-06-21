@@ -25,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @TestInstance(Lifecycle.PER_CLASS)
 @SpringJUnitConfig(classes = {}, initializers = ConfigDataApplicationContextInitializer.class)
-@TestPropertySource(properties = { "spring.config.location =classpath:application-dev.yml" })
+@TestPropertySource(properties = { "spring.config.location=classpath:application-dev.yml" })
 @ActiveProfiles("dev")
 public class PostgresqlDBConfigTest {
 
