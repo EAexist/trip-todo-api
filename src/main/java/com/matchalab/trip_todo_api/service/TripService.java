@@ -1,8 +1,11 @@
 package com.matchalab.trip_todo_api.service;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,6 +33,7 @@ import com.matchalab.trip_todo_api.repository.DestinationRepository;
 import com.matchalab.trip_todo_api.repository.PresetTodoContentRepository;
 import com.matchalab.trip_todo_api.repository.TodoRepository;
 import com.matchalab.trip_todo_api.repository.TripRepository;
+import com.matchalab.trip_todo_api.utils.Utils;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +43,10 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class TripService {
 
+    @Autowired
     private final VisionService visionService;
+    @Autowired
+    private final GenAIService genAIService;
 
     @Autowired
     private final TripRepository tripRepository;
@@ -61,12 +68,26 @@ public class TripService {
      */
     public ReservationDTO uploadReservationImage(Long tripId,
             List<MultipartFile> files) {
-        Trip trip = tripRepository.findById(tripId).orElseThrow(() -> new TripNotFoundException(tripId));
-        List<String> text = files.stream().map(file -> file.getResource()).map(visionService::extractTextfromImage)
-                .toList();
-        log.info(String.format("[extractTextfromImage] {}", text.toString()));
-        Accomodation accomodation = new Accomodation();
-        return new ReservationDTO(tripMapper.mapToAccomodationDTO(accomodation));
+        // Trip trip = tripRepository.findById(tripId).orElseThrow(() -> new
+        // TripNotFoundException(tripId));
+        List<String> reservationText = files.stream().map(file -> {
+            try {
+                return new InputStreamResource(file.getInputStream());
+            } catch (Exception e) {
+                return null;
+            }
+        })
+                // .map(Utils::multipartFileToBufferedImage)
+                // .map(Utils::bufferedImageToTiffResource)
+                .map(visionService::extractTextfromImage)
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
+        log.info(String.format("[extractTextfromImage] {}", reservationText.toString()));
+
+        String options = "mockedOptions";
+
+        ReservationDTO reservationDTO = genAIService.extractReservationInfofromText(reservationText, options);
+        return reservationDTO;
     }
 
     /**
