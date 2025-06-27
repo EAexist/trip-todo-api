@@ -1,5 +1,7 @@
 package com.matchalab.trip_todo_api.model.DTO;
 
+import com.matchalab.trip_todo_api.model.Location;
+
 import lombok.Builder;
 
 @Builder
@@ -12,5 +14,7 @@ public record TodoDTO(
         String category,
         String type,
         String title,
-        String iconId) {
+        String iconId,
+        Location departure,
+        Location arrival) {
 }

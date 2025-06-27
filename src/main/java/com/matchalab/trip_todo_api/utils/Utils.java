@@ -15,6 +15,9 @@ import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class Utils {
 
     public static URI getLocation(Object resourceId) {
@@ -40,6 +43,16 @@ public class Utils {
             // return new ByteArrayResource(tiffBytes);
         } catch (IOException e) {
             return null;
+        }
+    }
+
+    public static String asJsonString(final Object obj) {
+        try {
+            final ObjectMapper mapper = new ObjectMapper();
+            final String jsonContent = mapper.writeValueAsString(obj);
+            return jsonContent;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }

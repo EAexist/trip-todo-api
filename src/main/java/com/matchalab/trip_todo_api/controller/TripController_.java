@@ -25,7 +25,7 @@
 // import com.matchalab.trip_todo_api.model.DTO.AccomodationDTO;
 // import com.matchalab.trip_todo_api.model.DTO.DestinationDTO;
 // import com.matchalab.trip_todo_api.model.DTO.PresetTodoContentDTO;
-// import com.matchalab.trip_todo_api.model.DTO.ReservationDTO;
+// import com.matchalab.trip_todo_api.model.DTO.ReservationImageAnalysisResult;
 // import com.matchalab.trip_todo_api.model.DTO.TodoDTO;
 // import com.matchalab.trip_todo_api.model.DTO.TripDTO;
 // import com.matchalab.trip_todo_api.model.request.CreateTodoRequest;
@@ -48,7 +48,8 @@
 // * Provide the details of a Trip with the given id.
 // */
 // @PostMapping("/{tripId}/reservation")
-// public ResponseEntity<ReservationDTO> uploadReservationImage(@PathVariable
+// public ResponseEntity<ReservationImageAnalysisResult>
+// uploadReservationImage(@PathVariable
 // Long tripId,
 // @RequestParam("file") List<MultipartFile> files) {
 // try {

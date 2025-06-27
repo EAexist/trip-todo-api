@@ -9,7 +9,7 @@ public record AccomodationDTO(
         Long id,
         String title,
         String roomTitle,
-        int numberofClient,
+        int numberOfGuest,
         String clientName,
         String checkinDateISOString,
         String checkoutDateISOString,
