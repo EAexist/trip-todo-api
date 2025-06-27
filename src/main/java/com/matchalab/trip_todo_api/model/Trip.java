@@ -50,6 +50,10 @@ public class Trip {
     @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Accomodation> accomodation = new ArrayList<Accomodation>();
 
+    @Builder.Default
+    @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Flight> flight = new ArrayList<Flight>();
+
     public Trip(Trip trip) {
         this.title = trip.getTitle();
         this.startDateISOString = trip.getStartDateISOString();

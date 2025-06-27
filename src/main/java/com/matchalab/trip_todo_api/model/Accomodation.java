@@ -34,7 +34,7 @@ public class Accomodation {
     private Trip trip;
     private String title;
     private String roomTitle;
-    private int numberofClient;
+    private int numberOfGuest;
     private String clientName;
     private String checkinDateISOString;
     private String checkoutDateISOString;
@@ -51,7 +51,7 @@ public class Accomodation {
         this.title = accomodation.getTitle();
         this.trip = accomodation.getTrip();
         this.roomTitle = accomodation.getRoomTitle();
-        this.numberofClient = accomodation.getNumberofClient();
+        this.numberOfGuest = accomodation.getNumberOfGuest();
         this.clientName = accomodation.getClientName();
         this.checkinDateISOString = accomodation.getCheckinDateISOString();
         this.checkoutDateISOString = accomodation.getCheckoutDateISOString();
