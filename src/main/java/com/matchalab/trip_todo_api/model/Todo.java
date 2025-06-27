@@ -1,5 +1,8 @@
 package com.matchalab.trip_todo_api.model;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import jakarta.annotation.Nullable;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -43,11 +46,21 @@ public class Todo {
     @Nullable
     private PresetTodoContent presetTodoContent;
 
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Nullable
+    private Location departure;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Nullable
+    private Location arrival;
+
     public Todo(Todo todo) {
         this.note = todo.getNote();
         this.completeDateISOString = todo.getCompleteDateISOString();
         this.orderKey = todo.getOrderKey();
         this.customTodoContent = todo.getCustomTodoContent();
         this.presetTodoContent = todo.getPresetTodoContent();
+        this.departure = todo.getDeparture();
+        this.arrival = todo.getArrival();
     }
 }

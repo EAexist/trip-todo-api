@@ -27,7 +27,7 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-// @Component
+@Component
 public class DataLoader implements CommandLineRunner {
 
     @Autowired

@@ -1,17 +1,30 @@
 package com.matchalab.trip_todo_api.service;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
+import com.matchalab.trip_todo_api.enums.ReservationType;
 import com.matchalab.trip_todo_api.model.DTO.AccomodationDTO;
-import com.matchalab.trip_todo_api.model.DTO.ReservationDTO;
+import com.matchalab.trip_todo_api.model.DTO.ReservationImageAnalysisResult;
 
+import org.springframework.ai.chat.model.Generation;
+import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.chat.prompt.PromptTemplate;
+import org.springframework.ai.converter.BeanOutputConverter;
+import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatModel;
+import org.springframework.core.ParameterizedTypeReference;
+
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class GenAIService {
+
+    private final VertexAiGeminiChatModel geminiChatModel;
 
     /**
      * This method downloads an image from a URL and sends its contents to the
@@ -21,14 +34,154 @@ public class GenAIService {
      * @param imageUrl the URL of the image
      * @param map      the model map to use
      * @return a string with the list of labels and percentage of certainty
-     * @throws com.google.cloud.spring.vision.CloudVisionException if the Vision API
+     * @throws com.google.cloud.spring.vision.CloudVisionException if the Vision
+     *                                                             API
      *                                                             call produces an
      *                                                             error
      */
 
-    public ReservationDTO extractReservationInfofromText(List<String> text, String options) {
-        return new ReservationDTO(new AccomodationDTO(null, options, options, 0, options, options, options, options,
-                options, options, options, options, null));
+    // public ReservationImageAnalysisResult
+    // extractReservationInfofromText(List<String> text) {
+
+    // BeanOutputConverter<ReservationImageAnalysisResult> outputConverter = new
+    // BeanOutputConverter<>(
+    // new ParameterizedTypeReference<ReservationImageAnalysisResult>() {
+    // });
+
+    // String format = outputConverter.getFormat();
+    // String template = """
+    // Instruction: 다음 Text로 ReservationImageAnalysisResult를 생성해. 항공권 예약 내역이라면
+    // Flight만 생성하고, 숙소 예약 내역이라면 AccomodationDTO만 생성해. 찾을 수 없는 속성은 무시해.
+    // {format}\nText: {reservationText}
+    // """;
+
+    // Prompt prompt = new PromptTemplate(template)
+    // .create(Map.of("format", format, "reservationText", text));
+
+    // Generation generation = geminiChatModel.call(prompt).getResult();
+
+    // ReservationImageAnalysisResult reservationImageAnalysisResult =
+    // outputConverter
+    // .convert(generation.getOutput().getText());
+
+    // return reservationImageAnalysisResult;
+    // }
+
+    public ReservationImageAnalysisResult extractInfofromReservationText(List<String> text) {
+
+        BeanOutputConverter<ReservationImageAnalysisResult> outputConverter = new BeanOutputConverter<>(
+                new ParameterizedTypeReference<ReservationImageAnalysisResult>() {
+                });
+
+        String promptTemplate = """
+                다음 줄의 예약 내역 텍스트로 ReservationImageAnalysisResult를 생성해. ReservationImageAnalysisResult에 포함되는 새로운 예약 내역마다 다음 규칙에 따라 객체를 하나씩 생성해서 리스트 속성에 추가해. {reservationTypeInstruction}
+                {format}\nText: {reservationText}
+                """;
+        String reservationTypeInstruction = "*예약 내역 종류 - 추가할 객체 이름"
+                + String.format("*{} - {}\n", "숙소 예약", "accomodationDTO")
+                + String.format("*{} - {}\n", "항공편 모바일 탑승권", "flightTicket")
+                + String.format("*{} - {}\n", "모바일 탑승권이 아닌 항공권 예약 내역", "flight");
+        Prompt prompt = new PromptTemplate(promptTemplate)
+                .create(Map.of("format", outputConverter.getFormat(), "reservationTypeInstruction",
+                        reservationTypeInstruction, "reservationText", text));
+
+        Generation resultgeneration = geminiChatModel.call(prompt).getResult();
+        ReservationImageAnalysisResult result = outputConverter
+                .convert(resultgeneration.getOutput().getText());
+
+        return result;
+
+        // switch (reservationType) {
+        // case ReservationType.Accomodation:
+        // // result = extractStructuredReservationInfofromText<AccomodationDTO>(text)
+        // result = ReservationImageAnalysisResult.builder().accomodationDTO(
+        // this.<AccomodationDTO>extractStructuredReservationInfofromText(text)).build();
+        // break;
+        // case ReservationType.FlightTicket:
+        // break;
+        // case ReservationType.Flight:
+        // break;
+        // case ReservationType.Invalid:
+        // break;
+        // default:
+        // break;
+        // }
     }
 
+    private <T> T extractStructuredReservationInfofromText(List<String> text) {
+
+        BeanOutputConverter<T> outputConverter = new BeanOutputConverter<>(
+                new ParameterizedTypeReference<T>() {
+                });
+
+        String format = outputConverter.getFormat();
+        String template = """
+                다음 줄의 예약 내역을 읽고 결과를 생성해. 찾을 수 없는 속성은 무시해.
+                        {format}\nText: {reservationText}
+                        """;
+
+        Prompt prompt = new PromptTemplate(template)
+                .create(Map.of("format", format, "reservationText", text));
+
+        Generation generation = geminiChatModel.call(prompt).getResult();
+
+        T reservationImageAnalysisResult = outputConverter
+                .convert(generation.getOutput().getText());
+
+        return reservationImageAnalysisResult;
+    }
+
+    // public ReservationImageAnalysisResult
+    // classifyAndExtractInfofromReservationText(List<String> text) {
+
+    // BeanOutputConverter<ReservationType> outputConverter = new
+    // BeanOutputConverter<>(
+    // new ParameterizedTypeReference<ReservationType>() {
+    // });
+
+    // String classifyingPromptTemplate = """
+    // 줄의 예약 내역 텍스트를 다음 타입 중 하나로 분류하고 해당하는 ReservationType값을 반환해.
+    // {reservationTypeToExplanation}
+    // {format}\nText: {reservationText}
+    // """;
+    // String reservationTypeToExplanation = String.format("{}\n",
+    // ReservationType.Accomodation)
+    // + String.format("{}: 항공편 모바일 탑승권\n", ReservationType.FlightTicket)
+    // + String.format("{}: 모바일 탑승권이 아닌 항공권 예약 내역\n", ReservationType.Flight)
+    // + String.format("{}: 이전 옵션 중 어느것도 해당하지 않음.\n", ReservationType.Invalid);
+    // Prompt classifyingPrompt = new PromptTemplate(classifyingPromptTemplate)
+    // .create(Map.of("format", classifyingOutputConverter.getFormat(),
+    // "reservationTypeToExplanation",
+    // reservationTypeToExplanation, "reservationText", text));
+
+    // Generation classifyingResultgeneration =
+    // geminiChatModel.call(classifyingPrompt).getResult();
+    // ReservationType reservationType = classifyingOutputConverter
+    // .convert(classifyingResultgeneration.getOutput().getText());
+
+    // log.info(String.format("reservationType={}", reservationType));
+
+    // BeanOutputConverter<ReservationImageAnalysisResult> outputConverter = new
+    // BeanOutputConverter<>(
+    // new ParameterizedTypeReference<ReservationImageAnalysisResult>() {
+    // });
+    // ReservationImageAnalysisResult result;
+
+    // // switch (reservationType) {
+    // // case ReservationType.Accomodation:
+    // // // result =
+    // extractStructuredReservationInfofromText<AccomodationDTO>(text)
+    // // result = ReservationImageAnalysisResult.builder().accomodationDTO(
+    // this.<AccomodationDTO>extractStructuredReservationInfofromText(text)).build();
+    // // break;
+    // // case ReservationType.FlightTicket:
+    // // break;
+    // // case ReservationType.Flight:
+    // // break;
+    // // case ReservationType.Invalid:
+    // // break;
+    // // default:
+    // // break;
+    // // }
+    // }
 }

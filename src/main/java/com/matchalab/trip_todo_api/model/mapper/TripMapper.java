@@ -47,7 +47,7 @@ public abstract class TripMapper {
         return new TodoDTO(todo.getId(), todo.getOrderKey(), todo.getNote(), todo.getCompleteDateISOString(),
                 (todo.getPresetTodoContent() != null) ? todo.getPresetTodoContent().getId() : null,
                 todoContent.getCategory(), todoContent.getType(),
-                todoContent.getTitle(), todoContent.getIconId());
+                todoContent.getTitle(), todoContent.getIconId(), todo.getDeparture(), todo.getArrival());
 
     }
 

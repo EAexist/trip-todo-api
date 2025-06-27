@@ -12,5 +12,8 @@ public class CreateTodoRequest {
     private String category;
 
     @Nullable
+    private String type;
+
+    @Nullable
     private Long presetId;
 }

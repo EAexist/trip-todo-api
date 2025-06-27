@@ -334,7 +334,7 @@ public class TripControllerIntegrationTest {
                 .getFirst();
 
         TodoDTO todoDTOToPatch = new TodoDTO(null, 9, "새로운 노트", null, null, "goods", null,
-                "새로운 할 일 이름", "🎁");
+                "새로운 할 일 이름", "🎁", null, null);
 
         ResultActions result = mockMvc.perform(patch(String.format("/trip/%s/todo/%s", id, todo.getId()))
                 .contentType(MediaType.APPLICATION_JSON)
@@ -366,7 +366,7 @@ public class TripControllerIntegrationTest {
                 .getFirst();
 
         TodoDTO todoDTOToPatch = new TodoDTO(null, 9, "새로운 노트", "2025-02-20T00:00:00.001Z", null, null, null,
-                "새로운 할 일 이름", "🎁");
+                "새로운 할 일 이름", "🎁", null, null);
 
         ResultActions result = mockMvc.perform(patch(String.format("/trip/%s/todo/%s", id, todo.getId()))
                 .contentType(MediaType.APPLICATION_JSON)

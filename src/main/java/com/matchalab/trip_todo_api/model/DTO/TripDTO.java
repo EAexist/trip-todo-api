@@ -1,11 +1,9 @@
 package com.matchalab.trip_todo_api.model.DTO;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import lombok.Builder;
-import lombok.NonNull;
 import jakarta.annotation.Nullable;
+import lombok.Builder;
 
 /* https://github.com/projectlombok/lombok/issues/3883 */
 @Builder

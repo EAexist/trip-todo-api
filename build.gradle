@@ -74,7 +74,7 @@ dependencies {
 
     /* Google */    
     implementation 'com.google.cloud:spring-cloud-gcp-starter-vision'
-    implementation 'org.springframework.ai:spring-ai-starter-model-vertex-ai-gemini'
+    implementation 'org.springframework.ai:spring-ai-starter-model-vertex-ai-gemini:1.0.0'
 
     /* Test */
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'

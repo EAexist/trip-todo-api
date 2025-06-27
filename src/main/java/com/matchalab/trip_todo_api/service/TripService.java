@@ -1,10 +1,15 @@
 package com.matchalab.trip_todo_api.service;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.imageio.ImageIO;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,13 +22,14 @@ import com.matchalab.trip_todo_api.exception.TripNotFoundException;
 import com.matchalab.trip_todo_api.model.Accomodation;
 import com.matchalab.trip_todo_api.model.CustomTodoContent;
 import com.matchalab.trip_todo_api.model.Destination;
+import com.matchalab.trip_todo_api.model.Flight;
 import com.matchalab.trip_todo_api.model.PresetTodoContent;
 import com.matchalab.trip_todo_api.model.Todo;
 import com.matchalab.trip_todo_api.model.Trip;
 import com.matchalab.trip_todo_api.model.DTO.AccomodationDTO;
 import com.matchalab.trip_todo_api.model.DTO.DestinationDTO;
 import com.matchalab.trip_todo_api.model.DTO.PresetTodoContentDTO;
-import com.matchalab.trip_todo_api.model.DTO.ReservationDTO;
+import com.matchalab.trip_todo_api.model.DTO.ReservationImageAnalysisResult;
 import com.matchalab.trip_todo_api.model.DTO.TodoDTO;
 import com.matchalab.trip_todo_api.model.DTO.TripDTO;
 import com.matchalab.trip_todo_api.model.mapper.TripMapper;
@@ -35,8 +41,17 @@ import com.matchalab.trip_todo_api.repository.TodoRepository;
 import com.matchalab.trip_todo_api.repository.TripRepository;
 import com.matchalab.trip_todo_api.utils.Utils;
 
+import org.springframework.ai.chat.messages.Message;
+import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.chat.model.Generation;
+import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.chat.prompt.PromptTemplate;
+import org.springframework.ai.converter.BeanOutputConverter;
+import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatModel;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import java.awt.image.BufferedImage;
 
 @Slf4j
 @Service
@@ -45,6 +60,7 @@ public class TripService {
 
     @Autowired
     private final VisionService visionService;
+
     @Autowired
     private final GenAIService genAIService;
 
@@ -66,13 +82,47 @@ public class TripService {
     /**
      * Create new empty trip.
      */
-    public ReservationDTO uploadReservationImage(Long tripId,
+    private ReservationImageAnalysisResult analyzeReservationTextAndCreateEntities(Long tripId, List<String> text) {
+
+        /* Analyze Text with Generative AI */
+        ReservationImageAnalysisResult reservationImageAnalysisResult = genAIService
+                .extractInfofromReservationText(text);
+
+        /* Save Data */
+        ReservationImageAnalysisResult.ReservationImageAnalysisResultBuilder savedResultBuilder = ReservationImageAnalysisResult
+                .builder();
+        Trip trip = tripRepository.findById(tripId).orElseThrow(() -> new TripNotFoundException(tripId));
+
+        List<Accomodation> accomodation = reservationImageAnalysisResult.accomodation();
+        accomodation.stream().forEach(acc -> {
+            acc.setTrip(trip);
+        });
+        trip.getAccomodation().addAll(accomodation);
+        savedResultBuilder = savedResultBuilder
+                .accomodation(tripRepository.save(trip).getAccomodation().subList(-1 * (accomodation.size()), -1));
+
+        List<Flight> flight = reservationImageAnalysisResult.flight();
+        flight.stream().forEach(fl -> {
+            fl.setTrip(trip);
+        });
+        trip.getFlight().addAll(flight);
+        savedResultBuilder = savedResultBuilder
+                .flight(tripRepository.save(trip).getFlight().subList(-1 * (flight.size()), -1));
+
+        return savedResultBuilder.build();
+    }
+
+    /**
+     * Create new empty trip.
+     */
+    public ReservationImageAnalysisResult uploadReservationImage(Long tripId,
             List<MultipartFile> files) {
-        // Trip trip = tripRepository.findById(tripId).orElseThrow(() -> new
-        // TripNotFoundException(tripId));
-        List<String> reservationText = files.stream().map(file -> {
+
+        /* Extract Text from Image */
+        List<String> reservationText = files.stream().map(multipartFile -> {
             try {
-                return new InputStreamResource(file.getInputStream());
+                BufferedImage bi = ImageIO.read(multipartFile.getInputStream());
+                return new InputStreamResource(multipartFile.getInputStream());
             } catch (Exception e) {
                 return null;
             }
@@ -82,12 +132,26 @@ public class TripService {
                 .map(visionService::extractTextfromImage)
                 .flatMap(List::stream)
                 .collect(Collectors.toList());
+
         log.info(String.format("[extractTextfromImage] {}", reservationText.toString()));
 
-        String options = "mockedOptions";
+        return analyzeReservationTextAndCreateEntities(tripId, reservationText);
+    }
 
-        ReservationDTO reservationDTO = genAIService.extractReservationInfofromText(reservationText, options);
-        return reservationDTO;
+    /**
+     * Create new empty trip.
+     */
+    public ReservationImageAnalysisResult uploadReservationText(Long tripId, String text) {
+
+        return analyzeReservationTextAndCreateEntities(tripId, Arrays.asList(new String[] { text }));
+    }
+
+    /**
+     * Create new empty trip.
+     */
+    public ReservationImageAnalysisResult uploadReservationLink(Long tripId, String url) {
+
+        return analyzeReservationTextAndCreateEntities(tripId, Arrays.asList(new String[] { url }));
     }
 
     /**
@@ -118,18 +182,23 @@ public class TripService {
     /**
      * Create new todo.
      */
-    public TodoDTO createTodo(Long tripId, Long presetId, String category) {
-        Todo newTodo = new Todo();
+    public TodoDTO createTodo(Long tripId, TodoDTO todoDTO) {
+        Todo newTodo = tripMapper.mapToTodo(todoDTO);
         Trip trip = tripRepository.findById(tripId).orElseThrow(() -> new TripNotFoundException(tripId));
         newTodo.setOrderKey(0);
         newTodo.setTrip(trip);
-
-        if (presetId != null) {
-            newTodo.setPresetTodoContent(presetTodoContentRepository.findById(presetId)
-                    .orElseThrow(() -> new PresetTodoContentNotFoundException(presetId)));
-        } else {
-            newTodo.setCustomTodoContent(new CustomTodoContent(newTodo, category, "custom"));
+        if ((newTodo.getCustomTodoContent() != null) && newTodo.getCustomTodoContent().getType().equals("flight")) {
+            newTodo.getCustomTodoContent().setIconId("✈️");
+            newTodo.getCustomTodoContent().setTitle("항공권 예약");
+            log.info(Utils.asJsonString(newTodo.getCustomTodoContent()));
         }
+
+        // if (presetId != null) {
+        // newTodo.setPresetTodoContent(presetTodoContentRepository.findById(presetId)
+        // .orElseThrow(() -> new PresetTodoContentNotFoundException(presetId)));
+        // } else {
+        // newTodo.setCustomTodoContent(new CustomTodoContent(newTodo, category, type));
+        // }
 
         return tripMapper.mapToTodoDTO(todoRepository.save(newTodo));
     }
@@ -139,6 +208,7 @@ public class TripService {
      */
     public TodoDTO patchTodo(Long todoId, TodoDTO newTodoDTO) {
         Todo todo = todoRepository.findById(todoId).orElseThrow(() -> new NotFoundException(todoId));
+        log.info(Utils.asJsonString(newTodoDTO));
         if (todo.getCustomTodoContent() != null) {
             CustomTodoContent customTodoContent = tripMapper.updateCustomTodoContentFromDto(newTodoDTO,
                     todo.getCustomTodoContent());
@@ -146,6 +216,7 @@ public class TripService {
         }
         todo = tripMapper.updateTodoFromDto(newTodoDTO, todo);
 
+        log.info(Utils.asJsonString(tripMapper.mapToTodoDTO(todoRepository.save(todo))));
         return tripMapper.mapToTodoDTO(todoRepository.save(todo));
     }
 

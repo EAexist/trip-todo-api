@@ -9,7 +9,18 @@ spring:
         database: postgresql
         hibernate:
             ddl-auto: create-drop
+    ssl:
+        bundle:
+            pem:
+                mybundle:
+                    truststore:
+                        certificate: classpath:certs/ap-northeast-2-root.pem
+    cloud:
+        gcp:
+            project-id: travel-checklist-461608
+            credentials:
+                location: classpath:/certs/gc-service-account-key.json
 cors:
     client-url: http://localhost:8081
 server:
-    port: 8080
+    port: 5000
