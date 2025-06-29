@@ -166,9 +166,10 @@ public class TripController {
      * Provide the details of an Trip with the given id.
      */
     @PostMapping("/{tripId}/destination")
-    public ResponseEntity<DestinationDTO> createDestination(@PathVariable Long tripId) {
+    public ResponseEntity<DestinationDTO> createDestination(@PathVariable Long tripId,
+            @RequestBody DestinationDTO requestedDestinationDTO) {
         try {
-            DestinationDTO destinationDTO = tripService.createDestination(tripId);
+            DestinationDTO destinationDTO = tripService.createDestination(tripId, requestedDestinationDTO);
             return ResponseEntity.created(Utils.getLocation(destinationDTO.id())).body(destinationDTO);
         } catch (HttpClientErrorException e) {
             throw e;

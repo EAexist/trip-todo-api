@@ -1,6 +1,7 @@
 package com.matchalab.trip_todo_api.config;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -18,8 +19,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableWebSecurity
 public class WebSecurityConfig {
 
-    @Value("${cors.client-url}")
-    private String allowedOrigin;
+    @Value("#{'${cors.allowedOrigins}'.split(',')}")
+    private List<String> allowedOrigins;
 
     @Value("${spring.security.oauth2.resourceserver.jwt.kakao.issuer-uri}")
     private String kakaoIssuerUri;
@@ -69,7 +70,10 @@ public class WebSecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList(allowedOrigin));
+        configuration.setAllowedOrigins(allowedOrigins);
+
+        configuration.setAllowCredentials(true);
+        // configuration.setAllowedOrigins(List.of("http://localhost:8081"));
         configuration.setAllowedMethods(Arrays.asList("*"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         // configuration.setAllowCredentials(true);
