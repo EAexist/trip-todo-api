@@ -23,6 +23,10 @@ public class Location {
 
     String name;
     String title;
+    String nation;
+
+    @Nullable
+    String region;
 
     @Nullable
     String iataCode;

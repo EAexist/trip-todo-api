@@ -185,14 +185,23 @@ public class TripService {
     public TodoDTO createTodo(Long tripId, TodoDTO todoDTO) {
         Todo newTodo = tripMapper.mapToTodo(todoDTO);
         Trip trip = tripRepository.findById(tripId).orElseThrow(() -> new TripNotFoundException(tripId));
+        newTodo.setId(null);
         newTodo.setOrderKey(0);
         newTodo.setTrip(trip);
-        if ((newTodo.getCustomTodoContent() != null) && newTodo.getCustomTodoContent().getType().equals("flight")) {
-            newTodo.getCustomTodoContent().setIconId("✈️");
-            newTodo.getCustomTodoContent().setTitle("항공권 예약");
-            log.info(Utils.asJsonString(newTodo.getCustomTodoContent()));
+        if (newTodo.getCustomTodoContent() != null) {
+            switch (newTodo.getCustomTodoContent().getType()) {
+                case "flight":
+                    newTodo.getCustomTodoContent().setIconId("✈️");
+                    newTodo.getCustomTodoContent().setTitle("항공권 예약");
+                    break;
+                case "flightTicket":
+                    newTodo.getCustomTodoContent().setIconId("🛫");
+                    newTodo.getCustomTodoContent().setTitle("체크인");
+                    break;
+                default:
+                    break;
+            }
         }
-
         // if (presetId != null) {
         // newTodo.setPresetTodoContent(presetTodoContentRepository.findById(presetId)
         // .orElseThrow(() -> new PresetTodoContentNotFoundException(presetId)));
@@ -238,9 +247,9 @@ public class TripService {
     /**
      * Create new empty trip.
      */
-    public DestinationDTO createDestination(Long tripId) {
+    public DestinationDTO createDestination(Long tripId, DestinationDTO destinationDTO) {
         Trip trip = tripRepository.findById(tripId).orElseThrow(() -> new TripNotFoundException(tripId));
-        Destination newDestination = new Destination();
+        Destination newDestination = tripMapper.mapToDestination(destinationDTO);
         newDestination.setTrip(trip);
         trip.getDestination().add(newDestination);
         return tripMapper.mapToDestinationDTO(tripRepository.save(trip).getDestination().getLast());

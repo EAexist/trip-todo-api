@@ -5,6 +5,7 @@ import lombok.Builder;
 @Builder
 public record DestinationDTO(
         Long id,
+        String description,
         String nation,
         String title,
         String region) {
