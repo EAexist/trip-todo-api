@@ -54,6 +54,10 @@ public class Todo {
     @Nullable
     private Location arrival;
 
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Nullable
+    Flight flight;
+
     public Todo(Todo todo) {
         this.note = todo.getNote();
         this.completeDateISOString = todo.getCompleteDateISOString();
