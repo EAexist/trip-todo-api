@@ -1,5 +1,6 @@
 package com.matchalab.trip_todo_api.service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -108,7 +109,7 @@ public class GenAIService {
         // }
     }
 
-    private <T> T extractStructuredReservationInfofromText(List<String> text) {
+    public <T> List<T> extractReservationfromText(List<String> text, String textContextTitle) {
 
         BeanOutputConverter<T> outputConverter = new BeanOutputConverter<>(
                 new ParameterizedTypeReference<T>() {
@@ -116,7 +117,7 @@ public class GenAIService {
 
         String format = outputConverter.getFormat();
         String template = """
-                다음 줄의 예약 내역을 읽고 결과를 생성해. 찾을 수 없는 속성은 무시해.
+                다음 줄이 {textContextTitle}이라면 결과를 생성해. 찾을 수 없는 속성은 무시해. {textContextTitle}이 아니면 무시해.
                         {format}\nText: {reservationText}
                         """;
 
@@ -128,7 +129,7 @@ public class GenAIService {
         T reservationImageAnalysisResult = outputConverter
                 .convert(generation.getOutput().getText());
 
-        return reservationImageAnalysisResult;
+        return Arrays.asList(reservationImageAnalysisResult);
     }
 
     // public ReservationImageAnalysisResult

@@ -12,18 +12,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.matchalab.trip_todo_api.model.DTO.AccomodationDTO;
 import com.matchalab.trip_todo_api.model.DTO.DestinationDTO;
-import com.matchalab.trip_todo_api.model.DTO.PresetTodoContentDTO;
-import com.matchalab.trip_todo_api.model.DTO.ReservationImageAnalysisResult;
+import com.matchalab.trip_todo_api.model.DTO.PresetDTO;
 import com.matchalab.trip_todo_api.model.DTO.TodoDTO;
 import com.matchalab.trip_todo_api.model.DTO.TripDTO;
-import com.matchalab.trip_todo_api.model.request.CreateTodoRequest;
 import com.matchalab.trip_todo_api.service.TripService;
 import com.matchalab.trip_todo_api.utils.Utils;
 
@@ -31,45 +27,11 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/trip")
+@RequestMapping("user/{userId}/trip")
 public class TripController {
 
     @Autowired
     private final TripService tripService;
-
-    /**
-     * Provide the details of a Trip with the given id.
-     */
-    @PostMapping(value = "/{tripId}/reservation", params = "images")
-    public ResponseEntity<ReservationImageAnalysisResult> createReservationFromImage(@PathVariable Long tripId,
-            @RequestParam("images") List<MultipartFile> files) {
-        try {
-            return ResponseEntity.ok().body(tripService.uploadReservationImage(tripId,
-                    files));
-        } catch (HttpClientErrorException e) {
-            throw e;
-        }
-    }
-
-    @PostMapping(value = "/{tripId}/reservation", params = "text")
-    public ResponseEntity<ReservationImageAnalysisResult> createReservationFromText(@PathVariable Long tripId,
-            @RequestParam("text") String text) {
-        try {
-            return ResponseEntity.ok().body(tripService.uploadReservationText(tripId, text));
-        } catch (HttpClientErrorException e) {
-            throw e;
-        }
-    }
-
-    @PostMapping(value = "/{tripId}/reservation", params = "url")
-    public ResponseEntity<ReservationImageAnalysisResult> createReservationFromLink(@PathVariable Long tripId,
-            @RequestParam("url") String url) {
-        try {
-            return ResponseEntity.ok().body(tripService.uploadReservationLink(tripId, url));
-        } catch (HttpClientErrorException e) {
-            throw e;
-        }
-    }
 
     /**
      * Provide the details of a Trip with the given id.
@@ -89,9 +51,9 @@ public class TripController {
      */
     @PostMapping("")
     // public ResponseEntity<TripDTO> createTrip(@RequestBody Trip newTrip) {
-    public ResponseEntity<TripDTO> createTrip() {
+    public ResponseEntity<TripDTO> createTrip(@PathVariable Long userId) {
         try {
-            TripDTO tripDTO = tripService.createTrip();
+            TripDTO tripDTO = tripService.createTrip(userId);
             return ResponseEntity.created(Utils.getLocation(tripDTO.id())).body(tripDTO);
         } catch (HttpClientErrorException e) {
             throw e;
@@ -153,9 +115,9 @@ public class TripController {
      * Provide the details of an Trip with the given id.
      */
     @GetMapping("/{tripId}/todoPreset")
-    public ResponseEntity<List<PresetTodoContentDTO>> todoPreset(@PathVariable Long tripId) {
+    public ResponseEntity<List<PresetDTO>> todoPreset(@PathVariable Long tripId) {
         try {
-            List<PresetTodoContentDTO> presetTodoContentDTOs = tripService.getTodoPreset(tripId);
+            List<PresetDTO> presetTodoContentDTOs = tripService.getTodoPreset(tripId);
             return ResponseEntity.ok().body(presetTodoContentDTOs);
         } catch (HttpClientErrorException e) {
             throw e;
