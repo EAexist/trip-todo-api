@@ -1,10 +1,10 @@
-package com.matchalab.trip_todo_api.model;
+package com.matchalab.trip_todo_api.model.UserAccount;
 
 import lombok.Builder;
 
 @Builder
 public record KakaoProfile(
-        Long id,
+        String id,
         String email,
         String name,
         String nickname,

@@ -56,13 +56,6 @@
         "iconId": "🔌"
     },
     {
-        "id": 10,
-        "type": "goods",
-        "category": "goods",
-        "title": "선글라스",
-        "iconId": "🕶"
-    },
-    {
         "id": 11,
         "type": "goods",
         "category": "goods",
@@ -75,5 +68,12 @@
         "category": "goods",
         "title": "우산",
         "iconId": "☂️"
+    },
+    {
+        "id": 10,
+        "type": "goods",
+        "category": "goods",
+        "title": "선글라스",
+        "iconId": "🕶"
     }
 ]

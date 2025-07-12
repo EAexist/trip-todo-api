@@ -12,7 +12,6 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.matchalab.trip_todo_api.exception.PresetTodoContentNotFoundException;
 import com.matchalab.trip_todo_api.model.Accomodation;
 import com.matchalab.trip_todo_api.model.CustomTodoContent;
@@ -23,7 +22,6 @@ import com.matchalab.trip_todo_api.model.TodoContent;
 import com.matchalab.trip_todo_api.model.Trip;
 import com.matchalab.trip_todo_api.model.DTO.AccomodationDTO;
 import com.matchalab.trip_todo_api.model.DTO.DestinationDTO;
-import com.matchalab.trip_todo_api.model.DTO.PresetTodoContentDTO;
 import com.matchalab.trip_todo_api.model.DTO.TodoDTO;
 import com.matchalab.trip_todo_api.model.DTO.TripDTO;
 import com.matchalab.trip_todo_api.repository.PresetTodoContentRepository;
@@ -184,7 +182,9 @@ public abstract class TripMapper {
 
     public abstract Destination mapToDestination(DestinationDTO destinationDTO);
 
-    public abstract PresetTodoContentDTO mapToPresetTodoContentDTO(PresetTodoContent presetTodoContent);
+    // public PresetDTO mapToPresetDTO(PresetTodoContent presetTodoContent) {
+
+    // }
 
     // @Mapping(target = "destination", expression = "java(mapDestination(tripDTO,
     // trip))")

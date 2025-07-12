@@ -18,6 +18,9 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.matchalab.trip_todo_api.model.DTO.Reservation;
+import com.matchalab.trip_todo_api.model.UserAccount.UserAccount;
+
 @Entity
 @Getter
 @Setter
@@ -34,9 +37,12 @@ public class Trip {
     private String startDateISOString;
     private String endDateISOString;
 
+    @Builder.Default
+    private boolean isInitialized = false;
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+    @JoinColumn(name = "userAccount_id")
+    private UserAccount userAccount;
 
     @Builder.Default
     @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -53,6 +59,10 @@ public class Trip {
     @Builder.Default
     @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Flight> flight = new ArrayList<Flight>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Reservation> reservation = new ArrayList<Reservation>();
 
     public Trip(Trip trip) {
         this.title = trip.getTitle();
