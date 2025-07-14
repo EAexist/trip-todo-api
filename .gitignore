@@ -1,6 +1,6 @@
 
 # Elastic Beanstalk Files
-.elasticbeanstalk/*
+.elasticbeanstalk/
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
 
@@ -23,9 +23,9 @@ bin/
 pgdata/
 
 # Sensitive information
-src/main/resources/
+src/main/resources
 *.pem
-application-local.yml
-application-prod.yml
-application-dev.yml
-application.yml
+# application-local.yml
+# application-prod.yml
+# application-dev.yml
+# application.yml
