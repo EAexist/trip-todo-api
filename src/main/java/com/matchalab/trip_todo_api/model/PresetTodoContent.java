@@ -25,15 +25,14 @@ public class PresetTodoContent extends TodoContent {
             String category,
             String type,
             String title,
-            Icon icon,
-            String iconId) {
-        super(category, type, title, icon, iconId);
+            Icon icon) {
+        super(category, type, title, icon);
         this.id = id;
     }
 
     public PresetTodoContent(PresetTodoContent presetTodoContent) {
         super(presetTodoContent.getCategory(), presetTodoContent.getType(),
-                presetTodoContent.getTitle(), presetTodoContent.getIcon(), presetTodoContent.getIconId());
+                presetTodoContent.getTitle(), presetTodoContent.getIcon());
         this.id = presetTodoContent.getId();
     }
 }

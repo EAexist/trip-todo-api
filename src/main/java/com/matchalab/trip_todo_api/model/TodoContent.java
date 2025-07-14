@@ -23,8 +23,6 @@ public class TodoContent {
     @JdbcTypeCode(SqlTypes.JSON)
     private Icon icon;
 
-    private String iconId;
-
     public TodoContent(String category, String type) {
         this.category = category;
         this.type = type;
