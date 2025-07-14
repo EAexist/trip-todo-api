@@ -35,11 +35,11 @@ import com.matchalab.trip_todo_api.model.DTO.ReservationImageAnalysisResult;
 @ExtendWith(MockitoExtension.class)
 @ActiveProfiles("dev")
 @TestPropertySource(properties = { "spring.config.location=classpath:application-dev.yml" })
-public class TripServiceTest {
+public class ReservationServiceTest {
 
     // private VisionService visionService;
 
-    private TripService tripService;
+    private ReservationService reservationService;
 
     @BeforeEach
     public void setup() throws IOException {
@@ -50,9 +50,8 @@ public class TripServiceTest {
                         VertexAiGeminiChatOptions.builder().model("gemini-2.0-flash-lite").build(),
                         ToolCallingManager.builder().build(),
                         new RetryTemplate(), null));
-        tripService = new TripService(visionService, genAIService,
+        reservationService = new ReservationService(visionService, genAIService,
                 null,
-                null, null, null, null, null,
                 null);
     }
 
@@ -63,7 +62,8 @@ public class TripServiceTest {
                 "10:00", "도쿠시마", null, new HashMap<String, String>());
         String[] filePaths = { "/image/accomodation-agoda-app-ios_1.tiff", "/image/accomodation-agoda-app-ios_2.tiff" };
         List<MultipartFile> files = readFiles(filePaths);
-        ReservationImageAnalysisResult ReservationImageAnalysisResult = tripService.uploadReservationImage(0L, files);
+        ReservationImageAnalysisResult ReservationImageAnalysisResult = reservationService.uploadReservationImage(0L,
+                files);
 
         assertThat(ReservationImageAnalysisResult).isNotNull();
         assertThat(ReservationImageAnalysisResult.flight()).isEmpty();
@@ -80,7 +80,8 @@ public class TripServiceTest {
         Flight expectedFlight = new Flight();
         String[] filePaths = { "/image/flightReservation_Easterjet_KakaotalkScreenshot_1.png" };
         List<MultipartFile> files = readFiles(filePaths);
-        ReservationImageAnalysisResult ReservationImageAnalysisResult = tripService.uploadReservationImage(0L, files);
+        ReservationImageAnalysisResult ReservationImageAnalysisResult = reservationService.uploadReservationImage(0L,
+                files);
 
         assertThat(ReservationImageAnalysisResult).isNotNull();
         assertThat(ReservationImageAnalysisResult.accomodation()).isEmpty();
@@ -97,7 +98,8 @@ public class TripServiceTest {
         FlightTicket expectedFlightTicket = FlightTicket.builder().build();
         String[] filePaths = { "/image/flightTicket_Easterjet_mobileWebScreenshot_1.png" };
         List<MultipartFile> files = readFiles(filePaths);
-        ReservationImageAnalysisResult ReservationImageAnalysisResult = tripService.uploadReservationImage(0L, files);
+        ReservationImageAnalysisResult ReservationImageAnalysisResult = reservationService.uploadReservationImage(0L,
+                files);
 
         assertThat(ReservationImageAnalysisResult).isNotNull();
         assertThat(ReservationImageAnalysisResult.flight()).isEmpty();
@@ -114,7 +116,8 @@ public class TripServiceTest {
         FlightTicket expectedFlightTicket = FlightTicket.builder().build();
         String[] filePaths = { "/image/flightTicket_Easterjet_image_1.png" };
         List<MultipartFile> files = readFiles(filePaths);
-        ReservationImageAnalysisResult ReservationImageAnalysisResult = tripService.uploadReservationImage(0L, files);
+        ReservationImageAnalysisResult ReservationImageAnalysisResult = reservationService.uploadReservationImage(0L,
+                files);
 
         assertThat(ReservationImageAnalysisResult).isNotNull();
         assertThat(ReservationImageAnalysisResult.flight()).isEmpty();
