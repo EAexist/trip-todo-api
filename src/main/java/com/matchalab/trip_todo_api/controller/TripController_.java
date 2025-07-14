@@ -24,7 +24,7 @@
 // import com.matchalab.trip_todo_api.model.PresetTodoContent;
 // import com.matchalab.trip_todo_api.model.DTO.AccomodationDTO;
 // import com.matchalab.trip_todo_api.model.DTO.DestinationDTO;
-// import com.matchalab.trip_todo_api.model.DTO.PresetTodoContentDTO;
+// import com.matchalab.trip_todo_api.model.DTO.PresetDTO;
 // import com.matchalab.trip_todo_api.model.DTO.ReservationImageAnalysisResult;
 // import com.matchalab.trip_todo_api.model.DTO.TodoDTO;
 // import com.matchalab.trip_todo_api.model.DTO.TripDTO;
@@ -146,10 +146,10 @@
 // * Provide the details of an Trip with the given id.
 // */
 // @GetMapping("/{tripId}/todoPreset")
-// public ResponseEntity<List<PresetTodoContentDTO>> todoPreset(@PathVariable
+// public ResponseEntity<List<PresetDTO>> todoPreset(@PathVariable
 // Long tripId) {
 // try {
-// List<PresetTodoContentDTO> presetTodoContentDTOs =
+// List<PresetDTO> presetTodoContentDTOs =
 // TripService.getTodoPreset(tripId);
 // return ResponseEntity.ok().body(presetTodoContentDTOs);
 // } catch (HttpClientErrorException e) {

@@ -16,7 +16,6 @@ public record TodoDTO(
         String type,
         String title,
         Icon icon,
-        String iconId,
         Location departure,
         Location arrival) {
 }

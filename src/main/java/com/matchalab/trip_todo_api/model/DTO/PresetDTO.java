@@ -10,11 +10,11 @@ public record PresetDTO(
         PresetTodoContent todo) {
 }
 
-@Builder
-record PresetTodoContentDTO(
-        Long id,
-        String category,
-        String type,
-        String title,
-        String iconId) {
-}
+// @Builder
+// record PresetTodoContentDTO(
+// Long id,
+// String category,
+// String type,
+// String title,
+// Icon icon) {
+// }
