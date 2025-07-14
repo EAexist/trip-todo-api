@@ -45,7 +45,8 @@ public abstract class TripMapper {
         return new TodoDTO(todo.getId(), todo.getOrderKey(), todo.getNote(), todo.getCompleteDateISOString(),
                 (todo.getPresetTodoContent() != null) ? todo.getPresetTodoContent().getId() : null,
                 todoContent.getCategory(), todoContent.getType(),
-                todoContent.getTitle(), todoContent.getIconId(), todo.getDeparture(), todo.getArrival());
+                todoContent.getTitle(), todoContent.getIcon(), todoContent.getIconId(), todo.getDeparture(),
+                todo.getArrival());
 
     }
 
@@ -55,7 +56,7 @@ public abstract class TripMapper {
     @Named("mapCustomTodoContent")
     public CustomTodoContent mapCustomTodoContent(TodoDTO todoDTO) {
         return todoDTO.presetId() != null ? null
-                : new CustomTodoContent(null, null, todoDTO.category(), todoDTO.type(), todoDTO.title(),
+                : new CustomTodoContent(null, null, todoDTO.category(), todoDTO.type(), todoDTO.title(), todoDTO.icon(),
                         todoDTO.iconId());
     }
 
