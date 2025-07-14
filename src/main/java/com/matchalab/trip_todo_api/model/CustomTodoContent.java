@@ -38,6 +38,6 @@ public class CustomTodoContent extends TodoContent {
 
     public CustomTodoContent(CustomTodoContent customTodoContent) {
         super(customTodoContent.getCategory(), customTodoContent.getType(),
-                customTodoContent.getTitle(), customTodoContent.getIcon(), customTodoContent.getIconId());
+                customTodoContent.getTitle(), customTodoContent.getIcon());
     }
 }
