@@ -1,15 +1,9 @@
 package com.matchalab.trip_todo_api.model;
 
-import java.util.Locale.Category;
-
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -32,8 +26,9 @@ public class CustomTodoContent extends TodoContent {
             String category,
             String type,
             String title,
+            Icon icon,
             String iconId) {
-        super(category, type, title, iconId);
+        super(category, type, title, icon, iconId);
         this.id = id;
     }
 
@@ -44,6 +39,6 @@ public class CustomTodoContent extends TodoContent {
 
     public CustomTodoContent(CustomTodoContent customTodoContent) {
         super(customTodoContent.getCategory(), customTodoContent.getType(),
-                customTodoContent.getTitle(), customTodoContent.getIconId());
+                customTodoContent.getTitle(), customTodoContent.getIcon(), customTodoContent.getIconId());
     }
 }

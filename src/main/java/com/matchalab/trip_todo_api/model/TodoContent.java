@@ -1,8 +1,8 @@
 package com.matchalab.trip_todo_api.model;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import jakarta.persistence.MappedSuperclass;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,6 +19,10 @@ public class TodoContent {
     private String category;
     private String type;
     private String title;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    private Icon icon;
+
     private String iconId;
 
     public TodoContent(String category, String type) {

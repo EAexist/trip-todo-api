@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
 
+import com.matchalab.trip_todo_api.model.RecommendedFlight;
 import com.matchalab.trip_todo_api.model.DTO.AccomodationDTO;
 import com.matchalab.trip_todo_api.model.DTO.DestinationDTO;
 import com.matchalab.trip_todo_api.model.DTO.PresetDTO;
@@ -24,10 +25,12 @@ import com.matchalab.trip_todo_api.service.TripService;
 import com.matchalab.trip_todo_api.utils.Utils;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("user/{userId}/trip")
+@Slf4j
 public class TripController {
 
     @Autowired
@@ -119,6 +122,21 @@ public class TripController {
         try {
             List<PresetDTO> presetTodoContentDTOs = tripService.getTodoPreset(tripId);
             return ResponseEntity.ok().body(presetTodoContentDTOs);
+        } catch (HttpClientErrorException e) {
+            throw e;
+        }
+    }
+
+    /**
+     * Provide the details of an Trip with the given id.
+     */
+    @GetMapping("/{tripId}/recommendedFlight")
+    public ResponseEntity<List<RecommendedFlight>> getRecommendedFlight(@PathVariable Long tripId) {
+        try {
+            List<RecommendedFlight> recommendedFlight = tripService.getRecommendedFlight(tripId);
+
+            log.info(recommendedFlight.toString());
+            return ResponseEntity.ok().body(recommendedFlight);
         } catch (HttpClientErrorException e) {
             throw e;
         }

@@ -4,76 +4,109 @@
         "type": "accomodation",
         "category": "reservation",
         "title": "숙소 예약",
-        "iconId": "🛌"
+        "icon": {
+            "name": "🛌",
+            "type": "tossface"
+        }
     },
     {
         "id": 2,
         "type": "passport",
         "category": "foreign",
         "title": "여권",
-        "iconId": "passport"
+        "icon": {
+            "name": "passport",
+            "type": "material-community"
+        }
     },
     {
         "id": 3,
         "type": "currency",
         "category": "foreign",
         "title": "환전",
-        "iconId": "💱"
+        "icon": {
+            "name": "💱",
+            "type": "tossface"
+        }
     },
     {
         "id": 4,
         "type": "roaming",
         "category": "foreign",
         "title": "로밍",
-        "iconId": "📶"
+        "icon": {
+            "name": "📶",
+            "type": "tossface"
+        }
     },
     {
         "id": 5,
         "type": "visit-japan",
         "category": "foreign",
         "title": "Visit Japan",
-        "iconId": "📝"
+        "icon": {
+            "name": "📝",
+            "type": "tossface"
+        }
     },
     {
         "id": 7,
         "type": "military-approvement",
         "category": "foreign",
         "title": "국외여행허가",
-        "iconId": "🛌"
+        "icon": {
+            "name": "🛌",
+            "type": "tossface"
+        }
     },
     {
         "id": 8,
         "type": "goods",
         "category": "goods",
         "title": "세면도구",
-        "iconId": "🧴"
+        "icon": {
+            "name": "🧴",
+            "type": "tossface"
+        }
     },
     {
         "id": 9,
         "type": "goods",
         "category": "goods",
         "title": "어댑터",
-        "iconId": "🔌"
+        "icon": {
+            "name": "🔌",
+            "type": "tossface"
+        }
     },
     {
         "id": 11,
         "type": "goods",
         "category": "goods",
         "title": "캐리어",
-        "iconId": "🧳"
+        "icon": {
+            "name": "🧳",
+            "type": "tossface"
+        }
     },
     {
         "id": 12,
         "type": "goods",
         "category": "goods",
         "title": "우산",
-        "iconId": "☂️"
+        "icon": {
+            "name": "☂️",
+            "type": "tossface"
+        }
     },
     {
         "id": 10,
         "type": "goods",
         "category": "goods",
         "title": "선글라스",
-        "iconId": "🕶"
+        "icon": {
+            "name": "🕶",
+            "type": "tossface"
+        }
     }
 ]
