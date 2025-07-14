@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Bean;
 import com.matchalab.trip_todo_api.model.Accomodation;
 import com.matchalab.trip_todo_api.model.CustomTodoContent;
 import com.matchalab.trip_todo_api.model.Destination;
+import com.matchalab.trip_todo_api.model.Icon;
 import com.matchalab.trip_todo_api.model.PresetTodoContent;
 import com.matchalab.trip_todo_api.model.Todo;
 import com.matchalab.trip_todo_api.model.Trip;
@@ -22,27 +23,25 @@ import com.matchalab.trip_todo_api.model.DTO.TripDTO;
 @TestConfiguration
 public class TestConfig {
 
-    private Trip trip = new Trip(0L,
-            "Vaundy 보러 가는 도쿠시마 여행",
-            "2025-02-20T00:00:00.001Z",
-            "2025-02-25T00:00:00.001Z",
-            null,
-            null,
-            null,
-            null);
+    private Trip trip = Trip.builder().id(0L).title(
+            "Vaundy 보러 가는 도쿠시마 여행").startDateISOString(
+                    "2025-02-20T00:00:00.001Z")
+            .endDateISOString(
+                    "2025-02-25T00:00:00.001Z")
+            .build();
 
     private List<Todo> todolist = new ArrayList<Todo>();
     private List<TodoDTO> todoDTOlist = new ArrayList<TodoDTO>();
 
     @Bean
     Destination[] destinations() {
-        return new Destination[] { new Destination(null, null, "jp", "도쿠시마", "시코쿠"),
-                new Destination(null, null, "jp", "교토", "간사이") };
+        return new Destination[] { new Destination(null, null, "", "jp", "도쿠시마", "시코쿠"),
+                new Destination(null, null, "", "jp", "교토", "간사이") };
     }
 
     private List<DestinationDTO> destinationDTOs = new ArrayList<DestinationDTO>(
-            Arrays.asList(new DestinationDTO[] { new DestinationDTO(null, "jp", "도쿠시마", "시코쿠"),
-                    new DestinationDTO(null, "jp", "교토", "간사이") }));
+            Arrays.asList(new DestinationDTO[] { new DestinationDTO(null, "", "jp", "도쿠시마", "시코쿠"),
+                    new DestinationDTO(null, "", "jp", "교토", "간사이") }));
 
     @Bean
     Accomodation[] accomodations() {
@@ -123,13 +122,13 @@ public class TestConfig {
     @Bean
     PresetTodoContent presetTodoContent() {
         return new PresetTodoContent(1L, "foreign",
-                "currency", "환전", "💱");
+                "currency", "환전", new Icon("💱"));
     }
 
     @Bean
     CustomTodoContent customTodoContent() {
         return new CustomTodoContent(null, null, "goods",
-                "goods", "필름카메라", "📸");
+                "goods", "필름카메라", new Icon("📸"));
     }
 
     @Bean
@@ -141,19 +140,13 @@ public class TestConfig {
                 .category("foreign")
                 .type("currency")
                 .title("환전")
-                .iconId("💱")
+                .icon(new Icon("💱"))
                 .completeDateISOString(null).presetId(1L).build();
     }
 
     @Bean
     Todo presetTodo() {
-        Todo todo = new Todo(null,
-                "환전은 미리미리 할 것",
-                null,
-                0,
-                null,
-                null,
-                null);
+        Todo todo = new Todo(null, "환전은 미리미리 할 것", null, 0, null, null, null, null, null, null);
         return todo;
     }
 
@@ -166,7 +159,7 @@ public class TestConfig {
                 .category("goods")
                 .type("goods")
                 .title("필름카메라")
-                .iconId("📸")
+                .icon(new Icon("📸"))
                 .completeDateISOString("2025-02-23T00:00:00.001Z").presetId(null).build();
     }
 
@@ -178,7 +171,7 @@ public class TestConfig {
                 1,
                 null,
                 null,
-                null);
+                null, null, null, null);
         return todo;
     }
 
