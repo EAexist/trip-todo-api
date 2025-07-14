@@ -23,9 +23,6 @@ bin/
 pgdata/
 
 # Sensitive information
-src/main/resources
+src/main/resources/*
+!src/main/resources/static
 *.pem
-# application-local.yml
-# application-prod.yml
-# application-dev.yml
-# application.yml
