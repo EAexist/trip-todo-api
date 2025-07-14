@@ -18,6 +18,9 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import com.matchalab.trip_todo_api.model.DTO.Reservation;
 import com.matchalab.trip_todo_api.model.UserAccount.UserAccount;
 
@@ -59,6 +62,10 @@ public class Trip {
     @Builder.Default
     @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Flight> flight = new ArrayList<Flight>();
+
+    @Builder.Default
+    @JdbcTypeCode(SqlTypes.JSON)
+    private List<RecommendedFlight> recommendedFlight = new ArrayList<RecommendedFlight>();
 
     @Builder.Default
     @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)

@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 
 import com.matchalab.trip_todo_api.enums.ReservationType;
+import com.matchalab.trip_todo_api.model.RecommendedFlight;
 import com.matchalab.trip_todo_api.model.DTO.AccomodationDTO;
 import com.matchalab.trip_todo_api.model.DTO.ReservationImageAnalysisResult;
 
@@ -130,6 +131,31 @@ public class GenAIService {
                 .convert(generation.getOutput().getText());
 
         return Arrays.asList(reservationImageAnalysisResult);
+    }
+
+    public List<RecommendedFlight> getRecommendedFlight(String destinationTitle) {
+
+        BeanOutputConverter<List<RecommendedFlight>> outputConverter = new BeanOutputConverter<>(
+                new ParameterizedTypeReference<List<RecommendedFlight>>() {
+                });
+
+        String format = outputConverter.getFormat();
+        String departureTitle = "한국";
+        String language = "Korean";
+        String template = """
+                {departureTitle}에서 {destinationTitle}로 여행할 때 이용할 수 있는 모든 항공 노선들의 출발 공항과 도착 공항을 각각 알려줘. 직항이 있다면 직항이 아닌 노선은 제외해. 한국에서 많이 이용하는 순서대로 나열해.
+                {format} Provide Answer in {language}""";
+
+        Prompt prompt = new PromptTemplate(template)
+                .create(Map.of("departureTitle", departureTitle, "destinationTitle", destinationTitle, "format",
+                        format, "language", language));
+
+        Generation generation = geminiChatModel.call(prompt).getResult();
+
+        List<RecommendedFlight> recommendedFlight = outputConverter
+                .convert(generation.getOutput().getText());
+
+        return recommendedFlight;
     }
 
     // public ReservationImageAnalysisResult
