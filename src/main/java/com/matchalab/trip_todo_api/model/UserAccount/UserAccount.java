@@ -44,6 +44,7 @@ public class UserAccount {
     private List<Trip> trip;
 
     public UserAccount() {
+        this.nickname = "guest";
         this.trip = new ArrayList<Trip>();
     }
 
