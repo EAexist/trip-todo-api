@@ -1,1 +1,0 @@
-build: chmod +x ./gradlew && ./gradlew clean build

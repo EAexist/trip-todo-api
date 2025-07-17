@@ -1,3 +1,2 @@
-gradle clean build -x test
-git add .
-eb deploy --staged
+./gradlew clean build -x test -Dspring.profiles.active=prod
+eb deploy
