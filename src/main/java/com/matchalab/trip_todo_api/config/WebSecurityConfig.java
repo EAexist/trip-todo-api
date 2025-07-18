@@ -19,7 +19,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableWebSecurity
 public class WebSecurityConfig {
 
-    @Value("#{'${cors.allowedOrigins}'.split(',')}")
+    @Value("#{'${cors.allowed-origins}'.split(',')}")
     private List<String> allowedOrigins;
 
     @Value("${spring.security.oauth2.resourceserver.jwt.kakao.issuer-uri}")

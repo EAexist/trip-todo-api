@@ -43,7 +43,7 @@ public class AuthController {
     @Autowired
     private UserAccountMapper userAccountMapper;
 
-    @Value("${google.client_id}")
+    @Value("${google.client-id}")
     private String GOOGLE_CLIENT_ID;
 
     /**

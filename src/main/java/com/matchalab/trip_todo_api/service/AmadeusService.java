@@ -20,7 +20,7 @@
 // @Slf4j
 // public class AmadeusService {
 
-// @Value("${amadeus.client_id}")
+// @Value("${amadeus.client-id}")
 // private String AMADEUS_CLIENT_ID;
 
 // @Value("${amadeus.client_secret}")

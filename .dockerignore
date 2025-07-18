@@ -1,0 +1,40 @@
+# Sources
+src/*
+build/*
+!build/libs
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/
+.ebignore
+
+# Git
+.gitattributes
+.gitignore
+
+# Gradle
+.gradle/
+gradle/
+bin/
+
+# IDE specific files
+*.iml
+*.ipr
+*.iws
+*.project
+*.classpath
+*.prefs
+.vscode/
+
+# Docker
+Dockerfile
+pgdata/
+
+# Sensitive information
+!src/main/resources/static
+!src/main/resources/application.yml
+!src/main/resources/application-prod.yml
+*.pem
+
+scripts/
+
+

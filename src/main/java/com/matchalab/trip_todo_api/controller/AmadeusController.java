@@ -21,7 +21,7 @@ public class AmadeusController {
 
     private Amadeus amadeus;
 
-    public AmadeusController(@Value("${amadeus.client_id}") String AMADEUS_CLIENT_ID,
+    public AmadeusController(@Value("${amadeus.client-id}") String AMADEUS_CLIENT_ID,
             @Value("${amadeus.client_secret}") String AMADEUS_CLIENT_SECRET) {
         log.info(String.format("[AMADEUS_CLIENT_ID] %s", AMADEUS_CLIENT_ID));
         log.info(String.format("[AMADEUS_CLIENT_SECRET] %s", AMADEUS_CLIENT_SECRET));
