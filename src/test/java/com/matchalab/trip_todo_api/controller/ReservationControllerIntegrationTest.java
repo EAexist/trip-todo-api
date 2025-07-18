@@ -39,7 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 // @TestPropertySource(properties = { "spring.config.location =
 // classpath:application-test.yml" })
-@ActiveProfiles("dev")
+@ActiveProfiles("local")
 // @EnableWebSecurity
 public class ReservationControllerIntegrationTest {
 

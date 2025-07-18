@@ -33,8 +33,9 @@ import com.matchalab.trip_todo_api.model.DTO.AccomodationDTO;
 import com.matchalab.trip_todo_api.model.DTO.ReservationImageAnalysisResult;
 
 @ExtendWith(MockitoExtension.class)
-@ActiveProfiles("dev")
-@TestPropertySource(properties = { "spring.config.location=classpath:application-dev.yml" })
+@ActiveProfiles("local")
+// @TestPropertySource(properties = {
+// "spring.config.location=classpath:application-dev.yml" })
 public class ReservationServiceTest {
 
     // private VisionService visionService;

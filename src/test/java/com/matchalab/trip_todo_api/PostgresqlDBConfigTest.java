@@ -25,8 +25,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @TestInstance(Lifecycle.PER_CLASS)
 @SpringJUnitConfig(classes = {}, initializers = ConfigDataApplicationContextInitializer.class)
-@TestPropertySource(properties = { "spring.config.location=classpath:application-dev.yml" })
-@ActiveProfiles("dev")
+// @TestPropertySource(properties = {
+// "spring.config.location=classpath:application-dev.yml" })
+@ActiveProfiles("local")
 public class PostgresqlDBConfigTest {
 
     @Value("${spring.datasource.url}")
@@ -47,17 +48,18 @@ public class PostgresqlDBConfigTest {
         log.info("username={}", username);
         log.info("password={}", password);
 
-        Properties props = new Properties();
-        props.put("username", username);
-        props.put("password", password);
-        props.put("sslmode", "verify-ca");
-        props.put("ssl", "true");
+        // Properties props = new Properties();
+        // props.put("username", username);
+        // props.put("password", password);
+        // props.put("sslmode", "verify-ca");
+        // props.put("ssl", "true");
     }
 
     @Test
     void DBConnectionTest() throws SQLException {
-        Connection conn = DriverManager.getConnection(url, props);
-        log.info("연결 정보 확인: {}", conn);
+        Connection conn = DriverManager.getConnection(url, username, password);
+        // Connection conn = DriverManager.getConnection(url, props);
+        // log.info("연결 정보 확인: {}", conn);
         assertNotNull(conn);
     }
 }

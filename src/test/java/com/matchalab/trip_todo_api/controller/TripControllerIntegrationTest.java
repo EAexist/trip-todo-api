@@ -69,7 +69,7 @@ import lombok.extern.slf4j.Slf4j;
 // @TestPropertySource(properties = { "spring.config.location =
 // classpath:application-test.yml" })
 @TestInstance(Lifecycle.PER_CLASS)
-@ActiveProfiles("dev")
+@ActiveProfiles("local")
 @EnableWebSecurity
 public class TripControllerIntegrationTest {
 

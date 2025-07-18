@@ -29,8 +29,9 @@ import com.google.cloud.vision.v1.ImageAnnotatorClient;
 https://github.com/spring-attic/spring-cloud-gcp/blob/main/spring-cloud-gcp-vision/src/test/java/org/springframework/cloud/gcp/vision/CloudVisionTemplateTests.java
 */
 @ExtendWith(MockitoExtension.class)
-@ActiveProfiles("dev")
-@TestPropertySource(properties = { "spring.config.location =classpath:application-dev.yml" })
+@ActiveProfiles("local")
+// @TestPropertySource(properties = { "spring.config.location
+// =classpath:application-dev.yml" })
 // @EnabledIfSystemProperty(named = "it.vision", matches = "true")
 public class VisionServiceTest {
 
