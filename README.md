@@ -158,6 +158,7 @@ Project Link: [https://github.com/EAexist/trip-todo-api](https://github.com/EAex
 * [Gemini Developer API](https://ai.google.dev/gemini-api/docs)
 * [Spring VertexAI Gemini Chat](https://docs.spring.io/spring-ai/reference/api/chat/vertexai-gemini-chat.html)
 * [Amadeus](https://developers.amadeus.com/)
+* [Best-README-Template](https://github.com/EAexist/Best-README-Template)
 
 
 
