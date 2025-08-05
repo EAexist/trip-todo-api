@@ -204,6 +204,7 @@ public abstract class TripMapper {
 
     // @Mapping(target = "customTodoContent", expression =
     // "java(updateCustomTodoContentFromDto(todoDTO, todo.getCustomTodoContent()))")
+    @Mapping(target = "id", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     public abstract Todo updateTodoFromDto(TodoDTO todoDTO, @MappingTarget Todo todo);
 

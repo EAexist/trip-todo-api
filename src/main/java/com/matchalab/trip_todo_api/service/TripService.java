@@ -105,32 +105,33 @@ public class TripService {
      */
     public TodoDTO createTodo(Long tripId, TodoDTO todoDTO) {
         Todo newTodo = tripMapper.mapToTodo(todoDTO);
+        log.info(Utils.asJsonString(todoDTO));
+        log.info(Utils.asJsonString(newTodo));
         Trip trip = tripRepository.findById(tripId).orElseThrow(() -> new TripNotFoundException(tripId));
         newTodo.setId(null);
         newTodo.setOrderKey(0);
         newTodo.setTrip(trip);
         if (newTodo.getCustomTodoContent() != null) {
-            switch (newTodo.getCustomTodoContent().getType()) {
-                case "flight":
-                    newTodo.getCustomTodoContent().setIcon(new Icon("✈️", "tossface"));
-                    newTodo.getCustomTodoContent().setTitle("항공권 예약");
-                    break;
-                case "flightTicket":
-                    newTodo.getCustomTodoContent().setIcon(new Icon("🛫", "tossface"));
-                    newTodo.getCustomTodoContent().setTitle("체크인");
-                    break;
-                default:
-                    newTodo.getCustomTodoContent().setIcon(new Icon("⭐️", "tossface"));
-                    newTodo.getCustomTodoContent().setTitle("새 할 일");
-                    break;
+            if (newTodo.getCustomTodoContent().getType() == null) {
+                newTodo.getCustomTodoContent().setIcon(new Icon("⭐️", "tossface"));
+                newTodo.getCustomTodoContent().setTitle("새 할 일");
+            } else {
+                switch (newTodo.getCustomTodoContent().getType()) {
+                    case "flight":
+                        newTodo.getCustomTodoContent().setIcon(new Icon("✈️", "tossface"));
+                        newTodo.getCustomTodoContent().setTitle("항공권 예약");
+                        break;
+                    case "flightTicket":
+                        newTodo.getCustomTodoContent().setIcon(new Icon("🛫", "tossface"));
+                        newTodo.getCustomTodoContent().setTitle("체크인");
+                        break;
+                    default:
+                        newTodo.getCustomTodoContent().setIcon(new Icon("⭐️", "tossface"));
+                        newTodo.getCustomTodoContent().setTitle("새 할 일");
+                        break;
+                }
             }
         }
-        // if (presetId != null) {
-        // newTodo.setPresetTodoContent(presetTodoContentRepository.findById(presetId)
-        // .orElseThrow(() -> new PresetTodoContentNotFoundException(presetId)));
-        // } else {
-        // newTodo.setCustomTodoContent(new CustomTodoContent(newTodo, category, type));
-        // }
 
         return tripMapper.mapToTodoDTO(todoRepository.save(newTodo));
     }
@@ -141,15 +142,18 @@ public class TripService {
     public TodoDTO patchTodo(Long todoId, TodoDTO newTodoDTO) {
         Todo todo = todoRepository.findById(todoId).orElseThrow(() -> new NotFoundException(todoId));
         log.info(Utils.asJsonString(newTodoDTO));
+        log.info(Utils.asJsonString(tripMapper.mapToTodoDTO(todo)));
         if (todo.getCustomTodoContent() != null) {
             CustomTodoContent customTodoContent = tripMapper.updateCustomTodoContentFromDto(newTodoDTO,
                     todo.getCustomTodoContent());
             customTodoContentRepository.save(customTodoContent);
         }
-        todo = tripMapper.updateTodoFromDto(newTodoDTO, todo);
+        Todo updatedTodo = tripMapper.updateTodoFromDto(newTodoDTO, todo);
+        log.info(Utils.asJsonString(tripMapper.mapToTodoDTO(updatedTodo)));
 
-        log.info(Utils.asJsonString(tripMapper.mapToTodoDTO(todoRepository.save(todo))));
-        return tripMapper.mapToTodoDTO(todoRepository.save(todo));
+        TodoDTO todoDTO = tripMapper.mapToTodoDTO(todoRepository.save(updatedTodo));
+        log.info(Utils.asJsonString(todoDTO));
+        return todoDTO;
     }
 
     /**

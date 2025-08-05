@@ -53,6 +53,6 @@ public class VisionServiceTest {
         File _file = new ClassPathResource("/image/accomodation-agoda-app-ios_1.tiff").getFile();
         file = new MockMultipartFile(_file.getName(), new FileInputStream(_file));
         List<String> text = visionService.extractTextfromImage(file.getResource());
-        assertThat(text).contains("text");
+        assertThat(text).contains("HOSTEL PAQ tokushima");
     }
 }

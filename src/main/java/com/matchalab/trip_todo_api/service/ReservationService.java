@@ -1,6 +1,8 @@
 package com.matchalab.trip_todo_api.service;
 
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -8,6 +10,7 @@ import java.util.stream.Collectors;
 import javax.imageio.ImageIO;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileUrlResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,25 +24,35 @@ import com.matchalab.trip_todo_api.model.DTO.ReservationImageAnalysisResult;
 import com.matchalab.trip_todo_api.repository.ReservationRepository;
 import com.matchalab.trip_todo_api.repository.TripRepository;
 
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
+@Setter
 @RequiredArgsConstructor
 public class ReservationService {
-
-    @Autowired
-    private final VisionService visionService;
-
-    @Autowired
-    private final GenAIService genAIService;
 
     @Autowired
     private final TripRepository tripRepository;
 
     @Autowired
-    private final ReservationRepository reservationRepository;
+    private ReservationRepository reservationRepository;
+
+    @Autowired
+    private VisionService visionService;
+
+    @Autowired
+    private GenAIService genAIService;
+
+    // public ReservationService(TripRepository tripRepository, VisionService
+    // visionService, GenAIService genAIService) {
+    // this.tripRepository = tripRepository;
+    // this.genAIService = genAIService;
+    // this.visionService = visionService;
+    // }
 
     /**
      * Provide the details of a Trip with the given id.
@@ -60,39 +73,6 @@ public class ReservationService {
         reservation.setLocalAppStorageFileUri(localAppStorageFileUri);
 
         return reservationRepository.save(reservation);
-    }
-
-    /**
-     * Create new empty trip.
-     */
-    private ReservationImageAnalysisResult analyzeReservationTextAndCreateEntities(Long tripId, List<String> text) {
-
-        /* Analyze Text with Generative AI */
-        ReservationImageAnalysisResult reservationImageAnalysisResult = genAIService
-                .extractInfofromReservationText(text);
-
-        /* Save Data */
-        ReservationImageAnalysisResult.ReservationImageAnalysisResultBuilder savedResultBuilder = ReservationImageAnalysisResult
-                .builder();
-        Trip trip = tripRepository.findById(tripId).orElseThrow(() -> new TripNotFoundException(tripId));
-
-        List<Accomodation> accomodation = reservationImageAnalysisResult.accomodation();
-        accomodation.stream().forEach(acc -> {
-            acc.setTrip(trip);
-        });
-        trip.getAccomodation().addAll(accomodation);
-        savedResultBuilder = savedResultBuilder
-                .accomodation(tripRepository.save(trip).getAccomodation().subList(-1 * (accomodation.size()), -1));
-
-        List<Flight> flight = reservationImageAnalysisResult.flight();
-        flight.stream().forEach(fl -> {
-            fl.setTrip(trip);
-        });
-        trip.getFlight().addAll(flight);
-        savedResultBuilder = savedResultBuilder
-                .flight(tripRepository.save(trip).getFlight().subList(-1 * (flight.size()), -1));
-
-        return savedResultBuilder.build();
     }
 
     /**
@@ -168,14 +148,21 @@ public class ReservationService {
     /**
      * Create new empty trip.
      */
-    public ReservationImageAnalysisResult uploadReservationImage(Long tripId,
+    public ReservationImageAnalysisResult uploadReservationImage(
             List<MultipartFile> files) {
 
         /* Extract Text from Image */
         List<String> reservationText = files.stream().map(multipartFile -> {
             try {
-                BufferedImage bi = ImageIO.read(multipartFile.getInputStream());
-                return new InputStreamResource(multipartFile.getInputStream());
+                byte[] fileBytes = multipartFile.getBytes();
+                File tempFile = File.createTempFile("temp_tiff", ".tiff");
+                try (FileOutputStream fos = new FileOutputStream(tempFile)) {
+                    fos.write(fileBytes);
+                }
+                tempFile.deleteOnExit(); // 프로그램 종료 시 삭제
+                return new FileUrlResource(tempFile.toURI().toURL());
+                // BufferedImage bi = ImageIO.read(multipartFile.getInputStream());
+                // return new InputStreamResource(multipartFile.getInputStream());
             } catch (Exception e) {
                 return null;
             }
@@ -186,25 +173,57 @@ public class ReservationService {
                 .flatMap(List::stream)
                 .collect(Collectors.toList());
 
-        log.info(String.format("[extractTextfromImage] {}", reservationText.toString()));
+        log.info(String.format("[extractTextfromImage] reservationText=%s", reservationText.toString()));
 
-        return analyzeReservationTextAndCreateEntities(tripId, reservationText);
+        return genAIService.extractInfofromReservationText(reservationText);
+        // return createEntitiesFromImageAnalysisResult(tripId, reservationText);
     }
 
     /**
      * Create new empty trip.
      */
-    public ReservationImageAnalysisResult uploadReservationText(Long tripId, String text) {
+    public ReservationImageAnalysisResult uploadReservationText(
+            String text) {
 
-        return analyzeReservationTextAndCreateEntities(tripId, Arrays.asList(new String[] { text }));
+        return genAIService.extractInfofromReservationText(Arrays.asList(new String[] { text }));
     }
 
     /**
      * Create new empty trip.
      */
-    public ReservationImageAnalysisResult uploadReservationLink(Long tripId, String url) {
+    public ReservationImageAnalysisResult uploadReservationLink(
+            String url) {
 
-        return analyzeReservationTextAndCreateEntities(tripId, Arrays.asList(new String[] { url }));
+        return genAIService.extractInfofromReservationText(Arrays.asList(new String[] { url }));
     }
 
+    /**
+     * Create new empty trip.
+     */
+    public ReservationImageAnalysisResult saveImageAnalysisResult(Long tripId,
+            ReservationImageAnalysisResult reservationImageAnalysisResult) {
+
+        /* Save Data */
+        ReservationImageAnalysisResult.ReservationImageAnalysisResultBuilder savedResultBuilder = ReservationImageAnalysisResult
+                .builder();
+        Trip trip = tripRepository.findById(tripId).orElseThrow(() -> new TripNotFoundException(tripId));
+
+        List<Accomodation> accomodation = reservationImageAnalysisResult.accomodation();
+        accomodation.stream().forEach(acc -> {
+            acc.setTrip(trip);
+        });
+        trip.getAccomodation().addAll(accomodation);
+        savedResultBuilder = savedResultBuilder
+                .accomodation(tripRepository.save(trip).getAccomodation().subList(-1 * (accomodation.size()), -1));
+
+        List<Flight> flight = reservationImageAnalysisResult.flight();
+        flight.stream().forEach(fl -> {
+            fl.setTrip(trip);
+        });
+        trip.getFlight().addAll(flight);
+        savedResultBuilder = savedResultBuilder
+                .flight(tripRepository.save(trip).getFlight().subList(-1 * (flight.size()), -1));
+
+        return savedResultBuilder.build();
+    }
 }

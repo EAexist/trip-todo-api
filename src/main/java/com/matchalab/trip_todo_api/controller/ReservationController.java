@@ -77,8 +77,9 @@ public class ReservationController {
     public ResponseEntity<ReservationImageAnalysisResult> createReservationFromImage(@PathVariable Long tripId,
             @RequestParam("image") List<MultipartFile> files) {
         try {
-            return ResponseEntity.ok().body(reservationService.uploadReservationImage(tripId,
-                    files));
+            return ResponseEntity.ok().body(
+                    reservationService.saveImageAnalysisResult(tripId, reservationService.uploadReservationImage(
+                            files)));
         } catch (HttpClientErrorException e) {
             throw e;
         }
@@ -88,7 +89,8 @@ public class ReservationController {
     public ResponseEntity<ReservationImageAnalysisResult> createReservationFromText(@PathVariable Long tripId,
             @RequestParam("text") String text) {
         try {
-            return ResponseEntity.ok().body(reservationService.uploadReservationText(tripId, text));
+            return ResponseEntity.ok().body(reservationService.saveImageAnalysisResult(tripId,
+                    reservationService.uploadReservationText(text)));
         } catch (HttpClientErrorException e) {
             throw e;
         }

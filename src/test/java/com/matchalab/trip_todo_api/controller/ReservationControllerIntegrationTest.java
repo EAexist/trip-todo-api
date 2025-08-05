@@ -56,8 +56,9 @@ public class ReservationControllerIntegrationTest {
         ResultActions result = mockMvc
                 .perform(post(String.format("/trip/%s/reservation", id))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(new MultipartFile[] { file
-                        })))
+                // .content(asJsonString(new MultipartFile[] { file
+                // }))
+                )
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));

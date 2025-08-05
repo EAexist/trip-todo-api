@@ -80,9 +80,9 @@ public class GenAIService {
                 {format}\nText: {reservationText}
                 """;
         String reservationTypeInstruction = "*예약 내역 종류 - 추가할 객체 이름"
-                + String.format("*{} - {}\n", "숙소 예약", "accomodationDTO")
-                + String.format("*{} - {}\n", "항공편 모바일 탑승권", "flightTicket")
-                + String.format("*{} - {}\n", "모바일 탑승권이 아닌 항공권 예약 내역", "flight");
+                + String.format("*%s - %s\n", "숙소 예약", "accomodationDTO")
+                + String.format("*%s - %s\n", "항공편 모바일 탑승권", "flightTicket")
+                + String.format("*%s - %s\n", "모바일 탑승권이 아닌 항공권 예약 내역", "flight");
         Prompt prompt = new PromptTemplate(promptTemplate)
                 .create(Map.of("format", outputConverter.getFormat(), "reservationTypeInstruction",
                         reservationTypeInstruction, "reservationText", text));

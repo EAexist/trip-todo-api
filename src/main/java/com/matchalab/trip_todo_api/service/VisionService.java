@@ -1,5 +1,6 @@
 package com.matchalab.trip_todo_api.service;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +47,10 @@ public class VisionService {
     // }
 
     public List<String> extractTextfromImage(Resource resource) {
-        List<String> text = cloudVisionTemplate.extractTextFromFile(resource, "image/tiff");
+        // List<String> text = cloudVisionTemplate.extractTextFromFile(resource,
+        // "image/tiff");
+        String result = cloudVisionTemplate.extractTextFromImage(resource);
+        List<String> text = List.of(result);
         return text;
     }
 
