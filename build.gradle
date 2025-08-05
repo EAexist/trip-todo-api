@@ -1,3 +1,4 @@
+// https://github.com/GoogleCloudPlatform/spring-cloud-gcp/tree/main/spring-cloud-gcp-samples/spring-cloud-gcp-vision-api-sample
 plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.5.0'
@@ -9,7 +10,7 @@ version = '0.0.1-SNAPSHOT'
 
 java {
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
+		languageVersion = JavaLanguageVersion.of(22)
 	}
 }
 
@@ -22,20 +23,72 @@ configurations {
 repositories {
 	mavenCentral()
 }
+sourceSets {
+    main {
+        java {
+            srcDir "${project.buildDir}/generated/sources/annotationProcessor/java"
+        }
+    }
+    test {
+        java {
+            srcDirs "${project.buildDir}/generated/sources/annotationProcessor/java"
+        }
+    }
+}
+
+dependencyManagement {
+    imports {
+        mavenBom 'com.google.cloud:spring-cloud-gcp-dependencies:6.2.2'
+    }
+}
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	compileOnly 'org.projectlombok:lombok'
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
-	runtimeOnly 'org.postgresql:postgresql'
-	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.springframework.security:spring-security-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-}
+	// developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	runtimeOnly 'org.postgresql:postgresql' 
 
+    implementation 'org.mapstruct:mapstruct:1.6.3'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
+    testAnnotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
+
+	compileOnly 'org.projectlombok:lombok'    
+	annotationProcessor 'org.projectlombok:lombok'  
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+
+    /* DB */
+    implementation 'org.postgresql:postgresql'
+
+    /* Mapstruct */
+	annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'   
+    testAnnotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0' 
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    /* Security */
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	testImplementation 'org.springframework.security:spring-security-test'
+    
+    /* OAuth2.0 */
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+    
+    implementation("com.google.api-client:google-api-client:2.8.0")
+
+    /* Google */    
+    implementation 'com.google.cloud:spring-cloud-gcp-starter-vision'
+    implementation 'org.springframework.ai:spring-ai-starter-model-vertex-ai-gemini:1.0.0'
+
+
+    implementation "com.amadeus:amadeus-java:10.0.0"
+
+    /* Test */
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'org.assertj:assertj-core:3.27.2'
+    // testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    // testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+    
+}
 tasks.named('test') {
+	
 	useJUnitPlatform()
 }

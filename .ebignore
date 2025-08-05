@@ -1,0 +1,7 @@
+_.elasticbeanstalk/
+.gradle/
+.vscode/
+pgdata/
+_Buildfile
+src/
+docker-compose.yml
