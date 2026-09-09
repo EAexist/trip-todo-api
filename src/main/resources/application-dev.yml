@@ -3,6 +3,14 @@ spring:
     hibernate:
       ddl-auto: none
     show_sql: true
+  cloud:
+    gcp:
+      project-id: example-google-cloud-project-id
+  ai:
+    google:
+      genai:
+        project-id: example-project-id
+        api-key: example-api-key
 #  flyway:
 #    clean-disabled: false
 #  datasource:
@@ -33,6 +41,14 @@ server:
 app:
   cors:
     allowed-origins: https://localhost
+  google:
+    client-id: example-client-id
+    web-client-id: example-web-client-id
+  cors-allowed-origins: example-cors-allowed-origins
+  security:
+    admin-emails: example-security-admin-emails
+  google-places-api-key: example-google-places-api-key
+  google-places-base-url: example-google-places-base-url
 # bucket4j:
 #   filters:
 #     - cache-name: create-reservation-from-text-api-call-quota-cache

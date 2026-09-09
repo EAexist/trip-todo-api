@@ -6,18 +6,10 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 from shared.adapters.prometheus_adapter import TimeRange
-from shared.reporting.latency import (
-    get_reservation_analysis_e2e_latency,
-)
-from shared.reporting.spring_resource import (
-    get_spring_memory_used_avg,
-    get_spring_memory_used_peak,
-    get_spring_process_cpu_usage,
-)
-from shared.reporting.throughput import (
-    get_api_throughput,
-)
-from shared.utils import LoadTestRun, get_perf_result_path
+from shared.reporting.latency import get_reservation_analysis_e2e_latency
+from shared.reporting.spring_resource import get_spring_resource_usage
+from shared.reporting.throughput import get_api_throughput
+from shared.utils import LoadTestRun
 
 
 def report(test_id, n_iterations):
@@ -56,38 +48,33 @@ def report(test_id, n_iterations):
     stage_reports = {}
 
     print(stages_summary)
-    for stage_id, iterations in stages_summary.items():
+    for stage_id, time_ranges in stages_summary.items():
         stage_reports[stage_id] = {
-            "iterations": len(iterations),
+            "iterations": len(time_ranges),
             "vus": vus[stage_id],
             "reservation_analysis_e2e_latency": get_reservation_analysis_e2e_latency(
-                test_id=test_id, stage_id=stage_id, iterations=iterations
+                test_id=test_id, stage_id=stage_id, iterations=time_ranges
             ),
             "throughput": get_api_throughput(
-                test_id=test_id, stage_id=stage_id, method="POST", iterations=iterations
+                test_id=test_id,
+                stage_id=stage_id,
+                method="POST",
+                iterations=time_ranges,
             ),
-            "spring_cpu": get_spring_process_cpu_usage(
-                test_id=test_id, iterations=iterations
+            "spring_resource_usage": get_spring_resource_usage(
+                test_id=test_id, iterations=time_ranges
             ),
-            "spring_memory_avg": get_spring_memory_used_avg(
-                test_id=test_id, iterations=iterations
-            ),
-            "spring_memory_peak": get_spring_memory_used_peak(
-                test_id=test_id, iterations=iterations
-            ),
-            # "db_cpu": get_container_cpu_usage(container_name="db", iterations=iterations),
-            # "db_memory_avg": get_container_memory_working_set_avg(
-            #     container_name="db", iterations=iterations
-            # ),
-            # "db_memory_peak": get_container_memory_working_set_peak(
-            #     container_name="db", iterations=iterations
+            # "db_resource_usage": get_container_resource_usage(
+            #     container_service_id="db", iterations=time_ranges
             # ),
         }
 
     print(
         f"stage_reports :\n{'\n'.join([f'\t{k}: {v}' for k, v in stage_reports.items()])}"
     )
-    perf_result_path = get_perf_result_path(test_id)
+    perf_result_path = (
+        Path(__file__).resolve().parent / "output" / test_id / "result.json"
+    )
     with open(perf_result_path, "w", encoding="utf-8") as f:
         json.dump(stage_reports, f, indent=2)
 

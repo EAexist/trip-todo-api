@@ -5,6 +5,8 @@ networks:
 services:
   db:
     image: postgres:17.6
+    labels:
+      service_id: db
     networks:
       - app-network
     environment:

@@ -29,7 +29,7 @@ def get_output_dir(test_id: str):
     return output_path
 
 
-def get_perf_result_path(test_id: str):
+def get_perf_result_path(base_dir: str, test_id: str):
     perf_result_path = get_output_dir(test_id=test_id) / "result.json"
     return perf_result_path
 

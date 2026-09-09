@@ -8,7 +8,7 @@ from .utils import get_mean_and_std
 
 
 def get_api_throughput(
-    test_id: str, stage_id: str, method: str, stages: list[TimeRange]
+    test_id: str, stage_id: str, method: str, iterations: list[TimeRange]
 ) -> Dict[str, float]:
     """
     Calculates average throughput (RPS) per iteration for a given stage, then returns
@@ -18,9 +18,11 @@ def get_api_throughput(
     STAGE_START_BUFFER_SECONDS = int(os.getenv("STAGE_START_BUFFER_SECONDS", 0))
     iteration_avg_rps = []
 
-    for s in stages:
-        query_start_time = s.start_time + timedelta(seconds=STAGE_START_BUFFER_SECONDS)
-        query_end_time = s.end_time
+    for iteration in iterations:
+        query_start_time = iteration.start_time + timedelta(
+            seconds=STAGE_START_BUFFER_SECONDS
+        )
+        query_end_time = iteration.end_time
 
         query = f'sum(http_server_requests_seconds_count{{method="{method}", test_id="{test_id}", stage_id="{stage_id}"}})'
 

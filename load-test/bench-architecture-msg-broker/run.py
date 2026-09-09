@@ -41,7 +41,8 @@ def run_single_load_test(run: LoadTestRun, target_tag: str):
     # Run docker compose with prepared environment
     if (
         subprocess.run(
-            "docker compose \
+            f"docker compose \
+                -p benchmark-{target_tag} \
                 -f compose.loadtest.yml \
                 -f compose.llm-mock-server.yml \
                 -f ./bench-architecture-msg-broker/compose.baseline.yml \
@@ -148,11 +149,11 @@ if __name__ == "__main__":
         print(f"CPU isolation config validation failed: {e}")
         sys.exit(1)
 
-    for iteration in range(1, n_iterations + 1):
-        print(f"Running iteration {iteration}/{n_iterations}")
-        run = LoadTestRun(test_id, iteration)
-        run_single_load_test(run, target_tag)
-    print("Load Test Complete.")
+    # for iteration in range(1, n_iterations + 1):
+    #     print(f"Running iteration {iteration}/{n_iterations}")
+    #     run = LoadTestRun(test_id, iteration)
+    #     run_single_load_test(run, target_tag)
+    # print("Load Test Complete.")
 
     print("Starting Analysis.")
     report(test_id, n_iterations)

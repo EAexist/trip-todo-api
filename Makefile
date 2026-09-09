@@ -48,9 +48,10 @@ load-data: ## Load reference data
 	@$(GRADLE) bootRun --args='--spring.profiles.active=dev'
 
 schema-gen: ## Generate DB schema using Hibernate
-	@$(DB_COMPOSE) up -d
-	@$(GRADLE) bootRun -x test --args='--spring.profiles.active=dev,schema-generation'
-	@$(DB_COMPOSE) down
+	@$(DOCKER_COMPOSE_DEV) up -d && \
+	export $$(grep -v '^#' .env.dev.db | xargs) && \
+	$(GRADLE) bootRun -x test --args='--spring.profiles.active=dev,schema-generation'
+	@$(DOCKER_COMPOSE_DEV) down
 
 lambda-deploy: ## Build and deploy lambda with CDK
 	@lambda-build

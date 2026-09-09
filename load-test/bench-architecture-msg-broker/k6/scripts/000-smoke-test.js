@@ -9,19 +9,24 @@ import { getHeader, getPayload, login } from './utils.js';
 const baseUrl = __ENV.BASE_URL;
 
 const STAGES = [
-    // {
-    //     duration: '20s',
-    //     target: 100,
-    // },
     {
-        duration: '3s',
+        duration: '40s',
+        target: 100,
+    },
+    {
+        duration: '1m20s',
         target: 100,
         is_target: true,
     },
-    // {
-    //     duration: '20s',
-    //     target: 0,
-    // },
+    {
+        duration: '1m20s',
+        target: 100,
+        is_target: true,
+    },
+    {
+        duration: '40s',
+        target: 0,
+    },
 ]
 
 const getUri = (data) => `/trip/${data.tripId}/reservation/analysis/text`

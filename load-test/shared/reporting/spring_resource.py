@@ -5,6 +5,24 @@ from shared.adapters.prometheus_adapter import TimeRange
 from shared.reporting.utils import get_mean_value
 
 
+def get_spring_resource_usage(
+    test_id: str, iterations: list[TimeRange]
+) -> Dict[str, float]:
+    """
+    Calculates average process cpu usage per iteration for a given stage,
+    then returns the grand mean and sample standard deviation across all iterations.
+    """
+    return {
+        "cpu": get_spring_process_cpu_usage(test_id=test_id, iterations=iterations),
+        "memory_avg": get_spring_memory_used_avg(
+            test_id=test_id, iterations=iterations
+        ),
+        "memory_peak": get_spring_memory_used_peak(
+            test_id=test_id, iterations=iterations
+        ),
+    }
+
+
 def get_spring_process_cpu_usage(
     test_id: str, iterations: list[TimeRange]
 ) -> Dict[str, float]:
