@@ -7,16 +7,16 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from .reporter.reporter import report
-from .utils import (
+from shared.utils import (
     LoadTestRun,
-    get_running_containers,
     launch_host_memory_metrics_tracking,
     run_cmd,
     terminate_host_memory_metrics_tracking,
     verify_container_cpu_isolation_config,
     verify_containers_resource_config,
 )
+
+from .report import report
 
 cpu_map = {0: ["db"], 1: ["db"], 2: ["target-spring-app"], 3: ["target-spring-app"]}
 
@@ -41,9 +41,10 @@ def run_single_load_test(run: LoadTestRun, target_tag: str):
     # Run docker compose with prepared environment
     if (
         subprocess.run(
-            f"docker compose \
+            "docker compose \
                 -f compose.loadtest.yml \
-                -f compose.{run.test_id}.yml \
+                -f compose.llm-mock-server.yml \
+                -f ./bench-architecture-msg-broker/compose.baseline.yml \
                 up -d --wait",
             shell=True,
             env=env,
@@ -53,12 +54,7 @@ def run_single_load_test(run: LoadTestRun, target_tag: str):
         print("Failed to start docker compose.")
         sys.exit(1)
 
-    container_names = get_running_containers()
-    if not container_names:
-        print("No running containers found.")
-        sys.exit(1)
-
-    output_dir = Path(__file__).resolve().parent.parent / run.output_path
+    output_dir = Path(__file__).resolve().parent / run.output_path
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # Report VM internal resource config
@@ -67,15 +63,15 @@ def run_single_load_test(run: LoadTestRun, target_tag: str):
     with open(output_dir / "resource_config.json", "w") as f:
         json.dump(resource_data, f, indent=2)
 
-    # Start Host Memory Metrics Tracking
-    print("Launching Host Memory Metrics Trackings...")
     try:
+        # Start Host Memory Metrics Tracking
+        print("Launching Host Memory Metrics Trackings...")
         process = launch_host_memory_metrics_tracking(
             exe_path=os.environ["WINDOWS_EXPORTER_EXE_PATH"]
         )
 
         # Run k6
-        host_script_dir = Path(__file__).resolve().parent.parent / "k6" / "scripts"
+        host_script_dir = Path(__file__).resolve().parent / "k6" / "scripts"
         app_script_dir = "/etc/grafana/k6/scripts"
         app_script_path = f"{app_script_dir}/{args.script}"
 
@@ -89,7 +85,6 @@ def run_single_load_test(run: LoadTestRun, target_tag: str):
         summary_path = f"/etc/grafana/k6/{run.test_summary_path}"
 
         print(f"Executing k6 load test: {args.script}...")
-
         # https://grafana.com/docs/k6/latest/results-output/real-time/prometheus-remote-write/#send-test-metrics-to-a-remote-write-endpoint
         run_cmd(
             f'docker run\
@@ -108,7 +103,7 @@ def run_single_load_test(run: LoadTestRun, target_tag: str):
             -o experimental-prometheus-rw'
         )
     except Exception as e:
-        print(f"Host Memory Metrics Tracking failed: {e}")
+        print(f"Load test failed: {e}")
         sys.exit(1)
     finally:
         terminate_host_memory_metrics_tracking(process)
@@ -154,11 +149,9 @@ if __name__ == "__main__":
         sys.exit(1)
 
     for iteration in range(1, n_iterations + 1):
-        # run_id = datetime.now().strftime("%Y%m%d-%H%M%S")
         print(f"Running iteration {iteration}/{n_iterations}")
         run = LoadTestRun(test_id, iteration)
         run_single_load_test(run, target_tag)
-
     print("Load Test Complete.")
 
     print("Starting Analysis.")

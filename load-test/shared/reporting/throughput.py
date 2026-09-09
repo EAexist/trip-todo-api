@@ -2,7 +2,8 @@ import os
 from datetime import timedelta
 from typing import Dict
 
-from .adapters.prometheus_adapter import TimeRange, extract_value, fetch_metrics
+from shared.adapters.prometheus_adapter import TimeRange, extract_value, fetch_metrics
+
 from .utils import get_mean_and_std
 
 

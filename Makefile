@@ -40,7 +40,7 @@ gemini-live-latency-test: ## Run Gemini API live latency test
 
 bootRun: ## Run the application with DB and env vars
 	@$(DOCKER_COMPOSE_DEV) up -d && \
-	export $$(grep -v '^#' .env.dev | xargs) && \
+# 	export $$(grep -v '^#' .env.dev | xargs) && \
 	export $$(grep -v '^#' .env.dev.db | xargs) && \
 	$(GRADLE) bootRun -x test --args='--spring.profiles.active=dev,$(PROFILES)'
 
@@ -54,6 +54,7 @@ schema-gen: ## Generate DB schema using Hibernate
 
 lambda-deploy: ## Build and deploy lambda with CDK
 	@lambda-build
+
 aws-lambda-deploy: aws-lambda-build ## Deploy to AWS Lambda with CDK
 	@cd infra && cdk deploy
 

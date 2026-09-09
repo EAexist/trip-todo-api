@@ -1,6 +1,6 @@
 import math
 
-from .adapters.prometheus_adapter import fetch_metrics_range
+from shared.adapters.prometheus_adapter import fetch_metrics_range
 
 
 def get_cpu_steal(start_time, end_time):

@@ -302,8 +302,6 @@ def launch_host_memory_metrics_tracking_alloy(
     #             print(f"[{name}] Error running taskset command: {e}")
     #             results[name]["TasksetAffinity"] = f"Error: {e}"
 
-    return results
-
 
 def get_container_id(name: str) -> str:
     return run_cmd(f"docker inspect -f '{{{{.Id}}}}' {name}")
