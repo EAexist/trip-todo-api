@@ -106,9 +106,12 @@ def verify_container_cpu_isolation_config():
     print("  - isolcpus= present: True")
 
 
-def get_running_containers():
+def get_running_containers(project: str):
     # Get container names managed by the current docker-compose project
-    output = run_cmd("docker compose ps --format json", env={**docker_compose_env})
+    output = run_cmd(
+        f"docker compose -p {project} ps --format json",
+        env={**docker_compose_env},
+    )
     if not output:
         return []
 
@@ -122,8 +125,8 @@ def get_running_containers():
         return []
 
 
-def verify_containers_resource_config():
-    container_names = get_running_containers()
+def verify_containers_resource_config(project: str):
+    container_names = get_running_containers(project)
     if not container_names:
         print("No running containers found.")
         return

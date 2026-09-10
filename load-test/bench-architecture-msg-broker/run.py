@@ -38,11 +38,13 @@ def run_single_load_test(run: LoadTestRun, target_tag: str):
         "MANAGEMENT_METRICS_TAGS_ITERATION": str(run.iteration),
     }
 
+    project_id = f"benchmark-{target_tag}"
+
     # Run docker compose with prepared environment
     if (
         subprocess.run(
             f"docker compose \
-                -p benchmark-{target_tag} \
+                -p {project_id} \
                 -f compose.loadtest.yml \
                 -f compose.llm-mock-server.yml \
                 -f ./bench-architecture-msg-broker/compose.baseline.yml \
@@ -60,7 +62,7 @@ def run_single_load_test(run: LoadTestRun, target_tag: str):
 
     # Report VM internal resource config
     print("Reporting VM internal resource configuration...")
-    resource_data = verify_containers_resource_config()
+    resource_data = verify_containers_resource_config(project_id)
     with open(output_dir / "resource_config.json", "w") as f:
         json.dump(resource_data, f, indent=2)
 
@@ -149,11 +151,11 @@ if __name__ == "__main__":
         print(f"CPU isolation config validation failed: {e}")
         sys.exit(1)
 
-    # for iteration in range(1, n_iterations + 1):
-    #     print(f"Running iteration {iteration}/{n_iterations}")
-    #     run = LoadTestRun(test_id, iteration)
-    #     run_single_load_test(run, target_tag)
-    # print("Load Test Complete.")
+    for iteration in range(1, n_iterations + 1):
+        print(f"Running iteration {iteration}/{n_iterations}")
+        run = LoadTestRun(test_id, iteration)
+        run_single_load_test(run, target_tag)
+    print("Load Test Complete.")
 
     print("Starting Analysis.")
     report(test_id, n_iterations)

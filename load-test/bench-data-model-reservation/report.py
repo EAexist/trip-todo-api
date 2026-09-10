@@ -6,7 +6,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 from shared.adapters.prometheus_adapter import TimeRange
-from shared.reporting.container_resource import get_container_resource_usage
+from shared.reporting.generate_report import generate_report
 from shared.reporting.latency import (
     get_reservation_repository_find_all_by_id_latency,
     get_reservation_repository_save_all_latency,
@@ -16,9 +16,9 @@ from shared.reporting.spring_resource import get_spring_resource_usage
 
 def report(test_id):
 
-    summary_file_path = (
-        Path(__file__).resolve().parent / f"output/{test_id}/test-summary.json"
-    )
+    output_dir = Path(__file__).resolve().parent / "output" / f"{test_id}"
+
+    summary_file_path = output_dir / "test-summary.json"
 
     with open(summary_file_path, "r") as f:
         test_summary = json.load(f)
@@ -38,28 +38,33 @@ def report(test_id):
             )
         )
 
-    reports = {
-        "reservation_repository_save_all_latency": get_reservation_repository_save_all_latency(
-            test_id=test_id, iterations=time_ranges
-        ),
-        "reservation_repository_find_all_by_id_latency": get_reservation_repository_find_all_by_id_latency(
-            test_id=test_id, iterations=time_ranges
-        ),
-        "spring_resource_usage": get_spring_resource_usage(
-            test_id=test_id, iterations=time_ranges
-        ),
-        "db_resource_usage": get_container_resource_usage(
-            container_service_id="db", iterations=time_ranges
-        ),
+    result = {
+        "latencies": {
+            "reservation_repository_save_all_latency": get_reservation_repository_save_all_latency(
+                test_id=test_id, iterations=time_ranges
+            ),
+            "reservation_repository_find_all_by_id_latency": get_reservation_repository_find_all_by_id_latency(
+                test_id=test_id, iterations=time_ranges
+            ),
+        },
+        "resources": {
+            "spring": get_spring_resource_usage(
+                test_id=test_id, iterations=time_ranges
+            ),
+            # "db": get_container_resource_usage(
+            #     container_service_id="db", iterations=time_ranges
+            # ),
+        },
     }
 
-    print(f"reports :\n{'\n'.join([f'\t{k}: {v}' for k, v in reports.items()])}")
+    print(f"result :\n{'\n'.join([f'\t{k}: {v}' for k, v in result.items()])}")
 
-    # Save report to results directory
-    output_path = Path(summary_file_path).parent / "report.json"
-    with open(output_path, "w", encoding="utf-8") as f:
-        json.dump(reports, f, indent=2)
-    print(f"Report saved to {output_path}")
+    result_path = output_dir / "result.json"
+    with open(result_path, "w", encoding="utf-8") as f:
+        json.dump(result, f, indent=2)
+    print(f"Result saved to {result_path}")
+
+    generate_report(output_dir, f"Benchmark Single Run Report - {test_id}")
 
 
 def main():
@@ -69,9 +74,10 @@ def main():
     args = parser.parse_args()
 
     load_dotenv()
-    report(
-        args.test_id,
-    )
+
+    test_id = args.test_id
+    output_dir = Path(__file__).resolve().parent / "output" / f"{test_id}"
+    generate_report(output_dir, f"Benchmark Single Run Report - {test_id}")
 
 
 if __name__ == "__main__":

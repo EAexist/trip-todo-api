@@ -90,7 +90,7 @@ if __name__ == "__main__":
 
     # Report VM internal resource config
     print("Reporting VM internal resource configuration...")
-    resource_data = verify_containers_resource_config()
+    resource_data = verify_containers_resource_config(f"benchmark-{target_tag}")
     with open(output_dir / "resource_config.json", "w") as f:
         json.dump(resource_data, f, indent=2)
 
@@ -138,4 +138,5 @@ if __name__ == "__main__":
     print("Load Test Complete.")
 
     print("Starting Analysis.")
+
     report(test_id)

@@ -1,4 +1,4 @@
-.PHONY: bench-architecture-msg-broker bench-data-model-reservation llm-latency-approx
+.PHONY: bench-architecture-msg-broker bench-data-model-reservation-baseline llm-latency-approx
 
 # Default values for arguments
 TEST_ID ?=
@@ -38,4 +38,8 @@ docker-build-alloy-with-curl:
 	@cd alloy && \
 	docker build . -t grafana-alloy-with-curl:latest
 
+bench-architecture-msg-broker-report:
+	@$(MAKE) bench-architecture-msg-broker.report --test-id $(TEST_ID) --n-iterations $(N_ITERATIONS)
 
+bench-data-model-reservation-report:
+	@python -m bench-data-model-reservation.report --test-id $(TEST_ID)

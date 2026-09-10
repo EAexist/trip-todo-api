@@ -52,21 +52,27 @@ def report(test_id, n_iterations):
         stage_reports[stage_id] = {
             "iterations": len(time_ranges),
             "vus": vus[stage_id],
-            "reservation_analysis_e2e_latency": get_reservation_analysis_e2e_latency(
-                test_id=test_id, stage_id=stage_id, iterations=time_ranges
-            ),
-            "throughput": get_api_throughput(
-                test_id=test_id,
-                stage_id=stage_id,
-                method="POST",
-                iterations=time_ranges,
-            ),
-            "spring_resource_usage": get_spring_resource_usage(
-                test_id=test_id, iterations=time_ranges
-            ),
-            # "db_resource_usage": get_container_resource_usage(
-            #     container_service_id="db", iterations=time_ranges
-            # ),
+            "latencies": {
+                "reservation_analysis_e2e_latency": get_reservation_analysis_e2e_latency(
+                    test_id=test_id, stage_id=stage_id, iterations=time_ranges
+                ),
+            },
+            "throughputs": {
+                "e2e": get_api_throughput(
+                    test_id=test_id,
+                    stage_id=stage_id,
+                    method="POST",
+                    iterations=time_ranges,
+                ),
+            },
+            "resources": {
+                "spring": get_spring_resource_usage(
+                    test_id=test_id, iterations=time_ranges
+                ),
+                # "db": get_container_resource_usage(
+                #     container_service_id="db", iterations=time_ranges
+                # ),
+            },
         }
 
     print(
@@ -82,15 +88,16 @@ def report(test_id, n_iterations):
 def main():
     parser = argparse.ArgumentParser(description="Load Test reporting")
     parser.add_argument("--test-id", required=True, help="Test ID filter")
-    parser.add_argument("--output", default="report.csv", help="Output CSV file")
+    parser.add_argument(
+        "--n-iterations", type=int, required=True, help="Number of iterations"
+    )
 
     args = parser.parse_args()
 
     load_dotenv()
-    report(
-        args.test_id,
-        args.output,
-    )
+    test_id = args.test_id
+    output_dir = Path(__file__).resolve().parent / "output" / f"{test_id}"
+    # generate_report(output_dir, f"Benchmark Single Run Report - {test_id}")
 
 
 if __name__ == "__main__":
