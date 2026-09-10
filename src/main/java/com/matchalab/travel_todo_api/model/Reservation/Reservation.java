@@ -1,25 +1,13 @@
 package com.matchalab.travel_todo_api.model.Reservation;
 
 import com.matchalab.travel_todo_api.enums.ReservationCategory;
-import com.matchalab.travel_todo_api.model.Accomodation;
+import com.matchalab.travel_todo_api.mapper.ReservationDetailMapper;
+import com.matchalab.travel_todo_api.model.Todo.Todo;
 import com.matchalab.travel_todo_api.model.Trip;
 import io.micrometer.common.lang.NonNull;
 import jakarta.annotation.Nullable;
-import jakarta.persistence.Basic;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.PostLoad;
-import jakarta.persistence.PostPersist;
-import jakarta.persistence.Transient;
+import jakarta.persistence.*;
+
 import java.util.UUID;
 import javax.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -27,8 +15,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.springframework.data.domain.Persistable;
 
 @RequiredArgsConstructor
@@ -41,9 +29,9 @@ public class Reservation implements Persistable<UUID> {
 
   @Enumerated(EnumType.STRING)
   ReservationCategory category;
+
   @Id @NonNull @Builder.Default private UUID id = UUID.randomUUID();
   @Builder.Default private Boolean isCompleted = false;
-  @Lob
   @Basic(fetch = FetchType.LAZY)
   private String rawText;
 
@@ -54,32 +42,31 @@ public class Reservation implements Persistable<UUID> {
 
   @Nullable private String code;
 
-  private String note;
+  @JdbcTypeCode(SqlTypes.JSON)
+  @Column(name = "reservation_detail", columnDefinition = "jsonb")
+  private String detailJson;
 
-  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-  @OnDelete(action = OnDeleteAction.CASCADE)
-  @Nullable
-  private VisitJapan visitJapan;
+  @Transient
+  private ReservationDetail detail;
 
-  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-  @OnDelete(action = OnDeleteAction.CASCADE)
-  @Nullable
-  private Accomodation accomodation;
+  @PostLoad
+  private void deserializeDetail() {
+    if (this.detailJson != null && this.category != null) {
+      this.detail = ReservationDetailMapper.fromJson(this.detailJson, this.category);
+    }
+  }
 
-  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-  @OnDelete(action = OnDeleteAction.CASCADE)
-  @Nullable
-  private FlightBooking flightBooking;
+  @PrePersist
+  @PreUpdate
+  private void serializeDetail() {
+    if (this.detail != null) {
+      this.detailJson = ReservationDetailMapper.toJson(this.detail);
+    }
+  }
 
-  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-  @OnDelete(action = OnDeleteAction.CASCADE)
+  @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   @Nullable
-  private FlightTicket flightTicket;
-
-  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-  @OnDelete(action = OnDeleteAction.CASCADE)
-  @Nullable
-  private GeneralReservation generalReservation;
+  private Todo todo;
 
   // @Nullable
   // private String serverFileUri;
@@ -99,24 +86,7 @@ public class Reservation implements Persistable<UUID> {
     this.category = reservation.getCategory();
     // this.rawText = reservation.getRawText();
     this.primaryHrefLink = reservation.getPrimaryHrefLink();
-    this.accomodation =
-        reservation.getAccomodation() != null
-            ? new Accomodation(reservation.getAccomodation())
-            : null;
-    this.flightBooking =
-        reservation.getFlightBooking() != null
-            ? new FlightBooking(reservation.getFlightBooking())
-            : null;
-    this.flightTicket =
-        reservation.getFlightTicket() != null
-            ? new FlightTicket(reservation.getFlightTicket())
-            : null;
-    this.generalReservation =
-        reservation.getGeneralReservation() != null
-            ? new GeneralReservation(reservation.getGeneralReservation())
-            : null;
-    this.visitJapan =
-        reservation.getVisitJapan() != null ? new VisitJapan(reservation.getVisitJapan()) : null;
+    this.detail = reservation.detail;
     // this.serverFileUri = reservation.getServerFileUri();
     // this.localAppStorageFileUri = reservation.getLocalAppStorageFileUri();
   }
@@ -129,11 +99,5 @@ public class Reservation implements Persistable<UUID> {
   @Override
   public boolean isNew() {
     return this.isNew;
-  }
-
-  @PostPersist
-  @PostLoad
-  private void setIsNotNew() {
-    this.isNew = false;
   }
 }

@@ -10,12 +10,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ReservationRepository extends JpaRepository<Reservation, UUID> {
 
-    @EntityGraph(attributePaths = {
-            "visitJapan",
-            "accomodation",
-            "flightBooking",
-            "flightTicket",
-            "generalReservation"
-    })
+//    @EntityGraph(attributePaths = {
+//            "visitJapan",
+//            "accomodation",
+//            "flightBooking",
+//            "flightTicket",
+//            "generalReservation"
+//    })
     List<Reservation> findAllById(Iterable<UUID> ids);
 }
