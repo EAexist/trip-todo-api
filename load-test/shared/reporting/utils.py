@@ -1,4 +1,7 @@
 import math
+from string import Template
+
+from shared.adapters.prometheus_adapter import TimeRange, get_result_per_iteration
 
 
 def add_query_filters(query, filters):
@@ -11,6 +14,10 @@ def add_query_filters(query, filters):
         return query.replace("}", f", {matchers}}}", 1)
 
     return query + "{" + matchers + "}"
+
+
+def get_mean_value(template: Template, iterations: list[TimeRange]):
+    return get_mean_and_std(get_result_per_iteration(template, iterations))
 
 
 def get_mean_and_std(data: list):

@@ -29,7 +29,7 @@ def get_output_dir(test_id: str):
     return output_path
 
 
-def get_perf_result_path(test_id: str):
+def get_perf_result_path(base_dir: str, test_id: str):
     perf_result_path = get_output_dir(test_id=test_id) / "result.json"
     return perf_result_path
 
@@ -106,9 +106,12 @@ def verify_container_cpu_isolation_config():
     print("  - isolcpus= present: True")
 
 
-def get_running_containers():
+def get_running_containers(project: str):
     # Get container names managed by the current docker-compose project
-    output = run_cmd("docker compose ps --format json", env={**docker_compose_env})
+    output = run_cmd(
+        f"docker compose -p {project} ps --format json",
+        env={**docker_compose_env},
+    )
     if not output:
         return []
 
@@ -122,8 +125,8 @@ def get_running_containers():
         return []
 
 
-def verify_containers_resource_config():
-    container_names = get_running_containers()
+def verify_containers_resource_config(project: str):
+    container_names = get_running_containers(project)
     if not container_names:
         print("No running containers found.")
         return
@@ -301,8 +304,6 @@ def launch_host_memory_metrics_tracking_alloy(
     #         except Exception as e:
     #             print(f"[{name}] Error running taskset command: {e}")
     #             results[name]["TasksetAffinity"] = f"Error: {e}"
-
-    return results
 
 
 def get_container_id(name: str) -> str:

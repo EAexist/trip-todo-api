@@ -1,7 +1,6 @@
 package com.matchalab.travel_todo_api.model.Reservation;
 
 import com.matchalab.travel_todo_api.enums.ReservationCategory;
-import com.matchalab.travel_todo_api.model.Accomodation;
 import jakarta.annotation.Nullable;
 import java.util.UUID;
 import lombok.AllArgsConstructor;

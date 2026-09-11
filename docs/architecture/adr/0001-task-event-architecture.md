@@ -4,7 +4,7 @@
 
 <!--What is the status, such as proposed, accepted, rejected, deprecated, superseded, etc.? -->
 
-accpeted
+proposed
 
 ## Context
 

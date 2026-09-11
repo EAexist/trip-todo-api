@@ -3,7 +3,7 @@ package com.matchalab.travel_todo_api.config;
 import com.matchalab.travel_todo_api.enums.AccomodationCategory;
 import com.matchalab.travel_todo_api.enums.ReservationCategory;
 import com.matchalab.travel_todo_api.factory.AirportFactory;
-import com.matchalab.travel_todo_api.model.Accomodation;
+import com.matchalab.travel_todo_api.model.Reservation.Accomodation;
 import com.matchalab.travel_todo_api.model.Reservation.FlightBooking;
 import com.matchalab.travel_todo_api.model.Reservation.FlightTicket;
 import com.matchalab.travel_todo_api.model.Reservation.GeneralReservation;
@@ -29,7 +29,7 @@ public class MockReservationConfig {
           .category(ReservationCategory.FLIGHT_BOOKING)
           .primaryHrefLink("https://www.eastarjet.com/newstar/PGWRA00003?in_pnrNo=K9N96A")
           .code("K9N96A")
-          .flightBooking(
+          .detail(
               FlightBooking.builder()
                   .flightNumber("ZE671")
                   .departureDateTimeIsoString("2025-02-20")
@@ -73,7 +73,7 @@ public class MockReservationConfig {
         .rawText(parseReservationText("text/flightTicket/eastarjet/kakao_text_ko.txt"))
         .primaryHrefLink(null)
         .code("K9N96A")
-        .flightTicket(
+        .detail(
             FlightTicket.builder()
                 .flightNumber("ZE671")
                 .departureDateTimeIsoString("2025-02-20")
@@ -107,7 +107,7 @@ public class MockReservationConfig {
         .primaryHrefLink(
             "https://agoda.onelink.me/1640755593?pid=redirect&c=CONFIRMATION_EMAIL_ONELINK&af_dp=agoda%3a%2f%2fmmb%2f%3fbookingToken%3dzPG19SiliyJJ1yAm5RPtQA%3d%3d&deep_link_value=agoda%3a%2f%2fmmb%2f%3fbookingToken%3dzPG19SiliyJJ1yAm5RPtQA%3d%3d&af_sub1=EXP-ID-AM-7093-B&af_sub3=bebf6434-a5d7-42ce-805f-3715787ae814&af_sub4=Hotel&af_force_deeplink=true&af_web_dp=https%3a%2f%2fwww.agoda.com%2faccount%2feditbooking.html%3fbookingId%3dzPG19SiliyJJ1yAm5RPtQA%3d%3d%26")
         .code("1546592100")
-        .accomodation(
+        .detail(
             Accomodation.builder()
                 .category(AccomodationCategory.DORMITORY)
                 .title("HOSTEL PAQ tokushima")
@@ -132,7 +132,7 @@ public class MockReservationConfig {
         .primaryHrefLink(
             "https://www.etix.com/kketix/online/onlinereprint.jsp?userID=25504976&password=66755185")
         .code("4428332754")
-        .generalReservation(
+        .detail(
             GeneralReservation.builder()
                 .title("Teshima Art Museum")
                 .numberOfClient(1)
@@ -149,7 +149,7 @@ public class MockReservationConfig {
         .primaryHrefLink(
             "https://www.etix.com/kketix/online/onlinereprint.jsp?userID=25504976&password=66755185")
         .code("4428332898")
-        .generalReservation(
+        .detail(
             GeneralReservation.builder()
                 .title("Teshima Art Museum")
                 .numberOfClient(1)

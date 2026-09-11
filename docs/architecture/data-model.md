@@ -1,5 +1,6 @@
 # Logical Data Model
 
+
 ```mermaid
 erDiagram
     %% Core Entities

@@ -1,15 +1,8 @@
 package com.matchalab.travel_todo_api.mapper;
 
 import com.matchalab.travel_todo_api.enums.ReservationCategory;
-import com.matchalab.travel_todo_api.model.Accomodation;
+import com.matchalab.travel_todo_api.model.Reservation.*;
 import com.matchalab.travel_todo_api.model.Flight.Airport;
-import com.matchalab.travel_todo_api.model.Reservation.FlightBooking;
-import com.matchalab.travel_todo_api.model.Reservation.FlightTicket;
-import com.matchalab.travel_todo_api.model.Reservation.GeneralReservation;
-import com.matchalab.travel_todo_api.model.Reservation.Reservation;
-import com.matchalab.travel_todo_api.model.Reservation.ReservationDTO;
-import com.matchalab.travel_todo_api.model.Reservation.ReservationPatchDTO;
-import com.matchalab.travel_todo_api.model.Reservation.VisitJapan;
 import com.matchalab.travel_todo_api.model.genAI.ExtractAccomodationChatResultDTO;
 import com.matchalab.travel_todo_api.model.genAI.ExtractFlightBookingChatResultDTO;
 import com.matchalab.travel_todo_api.model.genAI.ExtractFlightTicketChatResultDTO;
@@ -19,13 +12,7 @@ import com.matchalab.travel_todo_api.repository.AirportRepository;
 import com.matchalab.travel_todo_api.utils.Utils;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
-import org.mapstruct.BeanMapping;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.NullValuePropertyMappingStrategy;
-import org.mapstruct.ReportingPolicy;
-import org.mapstruct.TargetType;
+import org.mapstruct.*;
 import org.openapitools.jackson.nullable.JsonNullable;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -66,9 +53,45 @@ public abstract class ReservationMapper {
     return optional != null && optional.isPresent() ? optional.get() : null;
   }
 
-  public abstract ReservationDTO mapToDTO(Reservation reservation);
+  public ReservationDTO mapToDTO(Reservation reservation) {
+    ReservationDetail detail = reservation.getDetail();
+
+    return ReservationDTO.builder()
+            .id(reservation.getId())
+            .category(reservation.getCategory())
+            .code(reservation.getCode())
+            .primaryHrefLink(reservation.getPrimaryHrefLink())
+            .isCompleted(reservation.getIsCompleted())
+            .accomodation(detail instanceof Accomodation a ? a : null)
+            .flightBooking(detail instanceof FlightBooking fb ? fb : null)
+            .flightTicket(detail instanceof FlightTicket ft ? ft : null)
+            .generalReservation(detail instanceof GeneralReservation gr ? gr : null)
+            .visitJapan(detail instanceof VisitJapan vj ? vj : null)
+            .build();
+  }
+
 
   public abstract Reservation mapToReservation(ReservationPatchDTO reservationDTO);
+
+  @AfterMapping
+  protected void linkDetailAndCategory(ReservationPatchDTO dto, @MappingTarget Reservation reservation) {
+    if (dto.getAccomodation() != null) {
+      reservation.setDetail(dto.getAccomodation().get());
+      reservation.setCategory(ReservationCategory.ACCOMODATION);
+    } else if (dto.getFlightBooking() != null) {
+      reservation.setDetail(dto.getFlightBooking().get());
+      reservation.setCategory(ReservationCategory.FLIGHT_BOOKING);
+    } else if (dto.getFlightTicket() != null) {
+      reservation.setDetail(dto.getFlightTicket().get());
+      reservation.setCategory(ReservationCategory.FLIGHT_TICKET);
+    } else if (dto.getGeneralReservation() != null) {
+      reservation.setDetail(dto.getGeneralReservation().get());
+      reservation.setCategory(ReservationCategory.GENERAL);
+    } else if (dto.getVisitJapan() != null) {
+      reservation.setDetail(dto.getVisitJapan().get());
+      reservation.setCategory(ReservationCategory.VISIT_JAPAN);
+    }
+  }
 
   @Mapping(target = "id", ignore = true)
   @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
@@ -139,7 +162,7 @@ public abstract class ReservationMapper {
         .category(ReservationCategory.ACCOMODATION)
         .primaryHrefLink(dto.reservationDetailHrefLink())
         .code(dto.reservationNumberOrCode())
-        .accomodation(mapToAccomodation(dto))
+        .detail(mapToAccomodation(dto))
         .build();
   }
 
@@ -148,7 +171,7 @@ public abstract class ReservationMapper {
         .category(ReservationCategory.FLIGHT_BOOKING)
         .primaryHrefLink(dto.reservationDetailHrefLink())
         .code(dto.reservationNumberOrCode())
-        .flightBooking(mapToFlightBooking(dto))
+        .detail(mapToFlightBooking(dto))
         .build();
   }
 
@@ -157,7 +180,7 @@ public abstract class ReservationMapper {
         .category(ReservationCategory.FLIGHT_TICKET)
         .primaryHrefLink(dto.reservationDetailHrefLink())
         .code(dto.reservationNumberOrCode())
-        .flightTicket(mapToFlightTicket(dto))
+        .detail(mapToFlightTicket(dto))
         .build();
   }
 
@@ -166,7 +189,7 @@ public abstract class ReservationMapper {
         .category(ReservationCategory.GENERAL)
         .primaryHrefLink(dto.reservationDetailHrefLink())
         .code(dto.reservationNumberOrCode())
-        .generalReservation(mapToGeneralReservation(dto))
+        .detail(mapToGeneralReservation(dto))
         .build();
   }
 

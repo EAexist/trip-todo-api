@@ -10,16 +10,21 @@ const baseUrl = __ENV.BASE_URL;
 
 const STAGES = [
     {
-        duration: '20s',
+        duration: '40s',
         target: 100,
     },
     {
-        duration: '100s',
+        duration: '1m20s',
         target: 100,
         is_target: true,
     },
     {
-        duration: '20s',
+        duration: '1m20s',
+        target: 100,
+        is_target: true,
+    },
+    {
+        duration: '40s',
         target: 0,
     },
 ]

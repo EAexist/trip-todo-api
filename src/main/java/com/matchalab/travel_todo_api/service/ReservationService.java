@@ -16,12 +16,14 @@ import com.matchalab.travel_todo_api.repository.TripRepository;
 import com.matchalab.travel_todo_api.service.ChatModelService.ChatModelService;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.Setter;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -81,6 +83,35 @@ public class ReservationService {
                         .toList();
         return reservation;
     }
+    public List<ReservationDTO> getReservations(List<UUID> ids) {
+        return findAllReservationsById(ids).stream().map(it -> reservationMapper.mapToDTO(it)).toList();
+    }
+
+    public List<Reservation> findAllReservationsById(List<UUID> ids) {
+        String stageId = stageContext.getCurrentStageId();
+
+        Timer.Sample sample = Timer.start(registry);
+        try {
+            return reservationRepository.findAllById(ids);
+        } finally {
+            Timer timer = Timer.builder("reservation.repository.find_all_by_id.duration")
+                    .description("ORM latency for findAllById operations")
+                    .tag("stage_id", stageId)
+                    .serviceLevelObjectives(
+                            Duration.ofNanos(100_000), // le="0.0001"   (100us)
+                            Duration.ofNanos(250_000), // le="0.00025"  (250us)
+                            Duration.ofNanos(500_000), // le="0.0005"   (500us)
+                            Duration.ofNanos(750_000), // le="0.00075"  (750us)
+                            Duration.ofMillis(1),      // le="0.001"    (1ms)
+                            Duration.ofMillis(2),      // le="0.002"    (2ms)
+                            Duration.ofMillis(5),      // le="0.005"    (5ms)
+                            Duration.ofMillis(10)      // le="0.01"     (10ms)
+                    )
+//                    .publishPercentileHistogram()
+                    .register(this.registry);
+            sample.stop(timer);
+        }
+    }
 
     /**
      * Create new todo.
@@ -95,6 +126,52 @@ public class ReservationService {
         tripRepository.save(trip);
 
         return reservationMapper.mapToDTO(reservation);
+    }
+
+    @Transactional
+    public List<ReservationDTO> createReservationBatch(UUID tripId, List<ReservationPatchDTO> reservationDTOs) {
+        if (!tripRepository.existsById(tripId)) {
+            throw new TripNotFoundException(tripId);
+        }
+        Trip tripProxy = tripRepository.getReferenceById(tripId);
+
+        List<Reservation> reservations = reservationDTOs.stream()
+                .map(dto -> {
+                    Reservation reservation = reservationMapper.mapToReservation(dto);
+                    reservation.setTrip(tripProxy);
+                    reservation.setId(UUID.randomUUID());
+                    return reservation;
+                })
+                .toList();
+        List<Reservation> savedReservations = saveAllReservations(reservations);
+
+        return savedReservations.stream().map(it -> reservationMapper.mapToDTO(it)).toList();
+    }
+
+    @Transactional
+    public List<Reservation> saveAllReservations(List<Reservation> reservations) {
+        Timer.Sample sample = Timer.start(registry);
+        try {
+            return reservationRepository.saveAllAndFlush(reservations);
+        } finally {
+            String stageId = stageContext.getCurrentStageId();
+            Timer timer = Timer.builder("reservation.repository.save_all.duration")
+                    .description("ORM latency for saveAll operations")
+                    .tag("stage_id", stageId)
+                    .serviceLevelObjectives(
+                            Duration.ofNanos(100_000), // le="0.0001"   (100us)
+                            Duration.ofNanos(250_000), // le="0.00025"  (250us)
+                            Duration.ofNanos(500_000), // le="0.0005"   (500us)
+                            Duration.ofNanos(750_000), // le="0.00075"  (750us)
+                            Duration.ofMillis(1),      // le="0.001"    (1ms)
+                            Duration.ofMillis(2),      // le="0.002"    (2ms)
+                            Duration.ofMillis(5),      // le="0.005"    (5ms)
+                            Duration.ofMillis(10)      // le="0.01"     (10ms)
+                    )
+//                    .publishPercentileHistogram()
+                    .register(this.registry);
+            sample.stop(timer);
+        }
     }
 
     /**

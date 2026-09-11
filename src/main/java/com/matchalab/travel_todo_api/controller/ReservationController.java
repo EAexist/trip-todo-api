@@ -68,6 +68,20 @@ public class ReservationController {
       return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
+
+    @GetMapping("reservations")
+    public ResponseEntity<List<ReservationDTO>> getReservations(
+            @RequestParam List<UUID> ids) {
+        List<ReservationDTO> reservationDTOs = reservationService.getReservations(ids);
+        return ResponseEntity.ok().body(reservationDTOs);
+    }
+
+    @PostMapping("trip/{tripId}/reservation/batch")
+    public ResponseEntity<List<ReservationDTO>> createReservations(
+            @PathVariable UUID tripId, @RequestBody List<ReservationPatchDTO> requestBodies) {
+        List<ReservationDTO> reservationDTOs = reservationService.createReservationBatch(tripId, requestBodies);
+        return ResponseEntity.status(HttpStatus.CREATED).body(reservationDTOs);
+    }
   /** Provide the details of a Trip with the given id. */
   // @PatchMapping(value = "/{reservationId}")
   // public ResponseEntity<Reservation> setLocalAppStorageFileUri(@PathVariable

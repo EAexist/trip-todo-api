@@ -5,8 +5,6 @@ from string import Template
 
 from prometheus_api_client import PrometheusConnect
 
-from ..utils import get_mean_and_std
-
 # PROMETHEUS_URL = os.environ["PROMETHEUS_URL"]
 PROMETHEUS_URL = "http://localhost:9090"
 
@@ -69,19 +67,23 @@ def get_buffered_stage_interval(start_time, end_time):
     return delta_sec
 
 
-def get_mean_value(template: Template, stages: list[TimeRange]) -> dict[str, float]:
+def get_result_per_iteration(
+    template: Template, iterations: list[TimeRange]
+) -> dict[str, float]:
     """
     Calculates average container cpu usage per iteration for a given stage,
     then returns the grand mean and sample standard deviation across all iterations.
     """
     results = []
 
-    for s in stages:
-        delta_sec = int(get_buffered_stage_interval(s.start_time, s.end_time))
+    for iteration in iterations:
+        delta_sec = int(
+            get_buffered_stage_interval(iteration.start_time, iteration.end_time)
+        )
         query = template.substitute(
             duration_string=f"{delta_sec}s",
         )
-        metrics = fetch_metrics(query, params={"time": s.end_time.timestamp()})
+        metrics = fetch_metrics(query, params={"time": iteration.end_time.timestamp()})
         results.append(extract_value(metrics))
 
-    return get_mean_and_std(results)
+    return results

@@ -8,7 +8,7 @@ import com.matchalab.travel_todo_api.DTO.TripSummaryDTO;
 import com.matchalab.travel_todo_api.DTO.UserAccountDTO;
 import com.matchalab.travel_todo_api.enums.AccomodationCategory;
 import com.matchalab.travel_todo_api.enums.TodoCategory;
-import com.matchalab.travel_todo_api.model.Accomodation;
+import com.matchalab.travel_todo_api.model.Reservation.Accomodation;
 import com.matchalab.travel_todo_api.model.Destination;
 import com.matchalab.travel_todo_api.model.Icon;
 import com.matchalab.travel_todo_api.model.Link;

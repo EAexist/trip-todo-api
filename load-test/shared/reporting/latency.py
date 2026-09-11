@@ -2,7 +2,7 @@ import os
 from datetime import timedelta
 from typing import Dict
 
-from .adapters.prometheus_adapter import TimeRange, fetch_metrics
+from shared.adapters.prometheus_adapter import TimeRange, fetch_metrics
 
 
 def parse_buckets_from_response(metrics_response: list) -> dict:
@@ -27,23 +27,70 @@ def parse_buckets_from_response(metrics_response: list) -> dict:
 
 
 def get_reservation_analysis_e2e_latency(
-    test_id: str, stage_id: str, stages: list[TimeRange]
-) -> float:
+    test_id: str, stage_id: str, iterations: list[TimeRange]
+) -> dict:
     """
-    1. Fetches raw rate(bucket) data across all iterations for (test_id, stage_id).
-    2. Merges histogram buckets across iterations by summing counts per 'le'.
-    3. Calculates a single, scientifically accurate P95 on the merged histogram.
+    Fetches raw bucket data for reservation_analysis_e2e_duration_seconds_bucket,
+    calculates aggregate and per-iteration P95/P50/P99.
     """
+    return fetch_and_calculate_histogram(
+        test_id=test_id,
+        stage_id=stage_id,
+        iterations=iterations,
+        metric_name="reservation_analysis_e2e_duration_seconds_bucket",
+    )
+
+
+def get_reservation_repository_save_all_latency(
+    test_id: str, iterations: list[TimeRange]
+) -> dict:
+    """
+    Fetches raw bucket data for reservation_repository_save_all_duration_seconds_bucket,
+    calculates aggregate and per-iteration P95/P50/P99.
+    """
+    return fetch_and_calculate_histogram(
+        test_id=test_id,
+        iterations=iterations,
+        metric_name="reservation_repository_save_all_duration_seconds_bucket",
+    )
+
+
+def get_reservation_repository_find_all_by_id_latency(
+    test_id: str, iterations: list[TimeRange]
+) -> dict:
+    """
+    Fetches raw bucket data for reservation_repository_find_all_by_id_duration_seconds_bucket,
+    calculates aggregate and per-iteration P95/P50/P99.
+    """
+    return fetch_and_calculate_histogram(
+        test_id=test_id,
+        iterations=iterations,
+        metric_name="reservation_repository_find_all_by_id_duration_seconds_bucket",
+    )
+
+
+def fetch_and_calculate_histogram(
+    test_id: str,
+    iterations: list[TimeRange],
+    metric_name: str,
+    stage_id: str = None,
+) -> dict:
+    """Helper to fetch and calculate histogram metrics for different repository operations."""
     merged_buckets: Dict[str, float] = {}
+    iteration_stats = []
 
     STAGE_START_BUFFER_SECONDS = int(os.getenv("STAGE_START_BUFFER_SECONDS", 0))
-    for s in stages:
-        query_start_time = s.start_time + timedelta(seconds=STAGE_START_BUFFER_SECONDS)
-        query_end_time = s.end_time
+    for iteration in iterations:
+        query_start_time = iteration.start_time + timedelta(
+            seconds=STAGE_START_BUFFER_SECONDS
+        )
+        query_end_time = iteration.end_time
 
-        print(query_start_time, query_end_time)
-
-        query = f'reservation_analysis_e2e_duration_seconds_bucket{{test_id="{test_id}", stage_id="{stage_id}"}}'
+        query = (
+            f'{metric_name}{{test_id="{test_id}", stage_id="{stage_id}"}}'
+            if stage_id is not None
+            else f'{metric_name}{{test_id="{test_id}"}}'
+        )
 
         start_metrics = fetch_metrics(
             query, params={"time": query_start_time.timestamp()}
@@ -53,15 +100,28 @@ def get_reservation_analysis_e2e_latency(
         start_bucket = parse_buckets_from_response(start_metrics)
         end_bucket = parse_buckets_from_response(end_metrics)
 
+        iter_buckets: Dict[str, float] = {}
         for le, end_val in end_bucket.items():
             start_val = start_bucket.get(le, 0.0)
             iter_delta = max(0.0, end_val - start_val)
+            iter_buckets[le] = iter_delta
             merged_buckets[le] = merged_buckets.get(le, 0.0) + iter_delta
 
+        iteration_stats.append(
+            {
+                "p95": calculate_histogram_quantile(0.95, iter_buckets),
+                "p50": calculate_histogram_quantile(0.50, iter_buckets),
+                "p99": calculate_histogram_quantile(0.99, iter_buckets),
+            }
+        )
+
     result = {
-        "p95": calculate_histogram_quantile(0.95, merged_buckets),
-        "p50": calculate_histogram_quantile(0.50, merged_buckets),
-        "p99": calculate_histogram_quantile(0.99, merged_buckets),
+        "aggregate": {
+            "p95": calculate_histogram_quantile(0.95, merged_buckets),
+            "p50": calculate_histogram_quantile(0.50, merged_buckets),
+            "p99": calculate_histogram_quantile(0.99, merged_buckets),
+        },
+        "iterations": iteration_stats,
     }
 
     return result
